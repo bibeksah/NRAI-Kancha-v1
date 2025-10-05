@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot Embed Example</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .embed-container {
+            width: 100%;
+            height: 600px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .instructions {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Chatbot - Embed Example</h1>
+        
+        <div class="embed-container">
+            <iframe 
+                src="/embed" 
+                title="AI Chatbot"
+                allow="microphone"
+            ></iframe>
+        </div>
+
+        <div class="instructions">
+            <h2>How to Embed</h2>
+            <p>To embed this chatbot in your website, use the following code:</p>
+            <pre><code>&lt;iframe 
+    src="https://your-domain.com/embed" 
+    width="100%" 
+    height="600px"
+    style="border: none; border-radius: 12px;"
+    title="AI Chatbot"
+    allow="microphone"
+&gt;&lt;/iframe&gt;</code></pre>
+            
+            <h3>Features:</h3>
+            <ul>
+                <li>✅ Text and voice input support</li>
+                <li>✅ English and Nepali language support</li>
+                <li>✅ Text-to-speech responses</li>
+                <li>✅ Responsive design</li>
+                <li>✅ Azure Identity authentication (no API keys exposed)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
