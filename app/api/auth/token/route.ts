@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       code: code,
       redirect_uri: `${request.nextUrl.origin}/auth/callback`,
       grant_type: "authorization_code",
-      scope: "https://cognitiveservices.azure.com/.default openid profile email",
+      scope: "https://ai.azure.com/.default openid profile email",
     })
 
     const response = await fetch(tokenUrl, {

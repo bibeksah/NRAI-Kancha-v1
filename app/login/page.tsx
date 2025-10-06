@@ -41,7 +41,7 @@ export default function LoginPage() {
       authUrl.searchParams.set("response_type", "code")
       authUrl.searchParams.set("redirect_uri", redirectUri)
       authUrl.searchParams.set("response_mode", "query")
-      authUrl.searchParams.set("scope", "https://cognitiveservices.azure.com/.default openid profile email")
+      authUrl.searchParams.set("scope", "https://ai.azure.com/.default openid profile email")
       authUrl.searchParams.set("state", state)
 
       // Redirect to Azure login

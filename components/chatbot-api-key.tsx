@@ -9,8 +9,6 @@ import { Card } from "@/components/ui/card"
 import { Mic, MicOff, Volume2, VolumeX, Send, Loader2, Languages } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SpeechService, type Language } from "@/lib/speech-service"
-import ReactMarkdown from "react-markdown"
-import remarkGfm from "remark-gfm"
 
 interface Message {
   id: string
@@ -76,6 +74,7 @@ export function Chatbot() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
+          // No accessToken - will use API key from server
         }),
       })
 
@@ -255,64 +254,7 @@ export function Chatbot() {
                 message.role === "user" ? "bg-primary text-primary-foreground" : "bg-card text-card-foreground",
               )}
             >
-              <div className="text-sm leading-relaxed">
-                {message.role === "user" ? (
-                  <p className="whitespace-pre-wrap m-0">{message.content}</p>
-                ) : (
-                  <>
-                    {/* Debug: Show if markdown is being used */}
-                    {process.env.NODE_ENV === 'development' && (
-                      <div className="text-xs opacity-50 mb-1">Markdown: {typeof ReactMarkdown !== 'undefined' ? '✓' : '✗'}</div>
-                    )}
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        // Custom styling for markdown elements
-                        h1: ({ node, ...props }) => <h1 className="text-xl font-bold mt-4 mb-3 first:mt-0" {...props} />,
-                        h2: ({ node, ...props }) => <h2 className="text-lg font-bold mt-3 mb-2 first:mt-0" {...props} />,
-                        h3: ({ node, ...props }) => <h3 className="text-base font-bold mt-3 mb-2 first:mt-0" {...props} />,
-                        h4: ({ node, ...props }) => <h4 className="text-sm font-semibold mt-2 mb-1 first:mt-0" {...props} />,
-                        p: ({ node, ...props }) => <p className="mb-3 last:mb-0" {...props} />,
-                        ul: ({ node, ...props }) => <ul className="list-disc ml-6 mb-3 space-y-1" {...props} />,
-                        ol: ({ node, ...props }) => <ol className="list-decimal ml-6 mb-3 space-y-1" {...props} />,
-                        li: ({ node, ...props }) => <li className="mb-1" {...props} />,
-                        strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
-                        em: ({ node, ...props }) => <em className="italic" {...props} />,
-                        code: ({ node, inline, ...props }) =>
-                          inline ? (
-                            <code className="px-1.5 py-0.5 rounded bg-muted text-xs font-mono" {...props} />
-                          ) : (
-                            <code className="block p-3 rounded bg-muted text-xs font-mono overflow-x-auto my-2" {...props} />
-                          ),
-                        pre: ({ node, ...props }) => (
-                          <pre className="bg-muted rounded p-3 overflow-x-auto my-2" {...props} />
-                        ),
-                        blockquote: ({ node, ...props }) => (
-                          <blockquote className="border-l-4 border-primary pl-4 italic my-3" {...props} />
-                        ),
-                        hr: ({ node, ...props }) => <hr className="my-4 border-border" {...props} />,
-                        a: ({ node, ...props }) => (
-                          <a className="text-primary underline hover:text-primary/80" {...props} />
-                        ),
-                        table: ({ node, ...props }) => (
-                          <div className="overflow-x-auto my-3">
-                            <table className="min-w-full border border-border" {...props} />
-                          </div>
-                        ),
-                        thead: ({ node, ...props }) => <thead className="bg-muted" {...props} />,
-                        tbody: ({ node, ...props }) => <tbody {...props} />,
-                        tr: ({ node, ...props }) => <tr className="border-b border-border" {...props} />,
-                        th: ({ node, ...props }) => (
-                          <th className="px-3 py-2 text-left font-semibold" {...props} />
-                        ),
-                        td: ({ node, ...props }) => <td className="px-3 py-2" {...props} />,
-                      }}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
-                  </>
-                )}
-              </div>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-xs opacity-70">
                   {message.timestamp instanceof Date
