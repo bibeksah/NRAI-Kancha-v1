@@ -1,7 +1,7 @@
 import { AgentsClient } from "@azure/ai-agents"
 import { DefaultAzureCredential } from "@azure/identity"
 import { AzureKeyCredential } from "@azure/core-auth"
-import { RestError, isRestError } from "@azure/core-rest-pipeline"
+import { isRestError } from "@azure/core-rest-pipeline"
 import type { TokenCredential, AccessToken, GetTokenOptions } from "@azure/core-auth"
 import type { PipelinePolicy, PipelineRequest, PipelineResponse, SendRequest } from "@azure/core-rest-pipeline"
 
@@ -26,7 +26,7 @@ class CustomTokenCredential implements TokenCredential {
     this.expiresOn = Date.now() + 3600 * 1000
   }
 
-  async getToken(scopes: string | string[], options?: GetTokenOptions): Promise<AccessToken | null> {
+  async getToken(scopes: string | string[]): Promise<AccessToken | null> {
     console.log("[v0] CustomTokenCredential.getToken called with scopes:", scopes)
 
     // Check if token is expired

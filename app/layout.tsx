@@ -6,9 +6,9 @@ import { Inter } from 'next/font/google'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
+  title: 'NRAI Kancha - AI Assistant',
+  description: 'Bilingual AI Assistant with voice support for English and Nepali',
+  generator: 'NRAI Kancha',
 }
 
 export default function RootLayout({

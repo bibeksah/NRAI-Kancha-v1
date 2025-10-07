@@ -1,8 +1,6 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -38,7 +36,7 @@ export function Chatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  const initializeSpeechService = async () => {
+  const initializeSpeechService = async (): Promise<void> => {
     try {
       const response = await fetch("/api/speech-token")
       const data = await response.json()
@@ -54,7 +52,7 @@ export function Chatbot() {
     }
   }
 
-  const sendMessage = async (text: string) => {
+  const sendMessage = async (text: string): Promise<void> => {
     if (!text.trim()) return
 
     const userMessage: Message = {
@@ -64,7 +62,7 @@ export function Chatbot() {
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    setMessages((prev: Message[]) => [...prev, userMessage])
     setInput("")
     setIsLoading(true)
 
@@ -74,7 +72,6 @@ export function Chatbot() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
-          // No accessToken - will use API key from server
         }),
       })
 
@@ -92,14 +89,12 @@ export function Chatbot() {
       const data = await response.json()
 
       if (data.messages) {
-        // Convert timestamp strings to Date objects
-        const messagesWithDates = data.messages.map((msg: any) => ({
+        const messagesWithDates = data.messages.map((msg: Message) => ({
           ...msg,
           timestamp: new Date(msg.timestamp),
         }))
         setMessages(messagesWithDates)
 
-        // Auto-speak the last assistant message
         if (autoSpeak) {
           const lastMessage = data.messages[data.messages.length - 1]
           if (lastMessage.role === "assistant") {
@@ -107,7 +102,7 @@ export function Chatbot() {
           }
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("[v0] Failed to send message:", error)
       const errorMessage: Message = {
         id: Date.now().toString(),
@@ -116,31 +111,30 @@ export function Chatbot() {
           error instanceof Error ? `Error: ${error.message}` : "Sorry, I encountered an error. Please try again.",
         timestamp: new Date(),
       }
-      setMessages((prev) => [...prev, errorMessage])
+      setMessages((prev: Message[]) => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault()
     sendMessage(input)
   }
 
-  const startListening = async () => {
+  const startListening = async (): Promise<void> => {
     if (!speechServiceRef.current) return
 
     setIsListening(true)
     try {
       await speechServiceRef.current.recognizeSpeech(
         language,
-        (text) => {
+        (text: string) => {
           setInput(text)
           setIsListening(false)
-          // Auto-send after recognition
           sendMessage(text)
         },
-        (error) => {
+        (error: Error) => {
           console.error("Speech recognition error:", error)
           setIsListening(false)
         },
@@ -151,14 +145,14 @@ export function Chatbot() {
     }
   }
 
-  const stopListening = () => {
+  const stopListening = (): void => {
     if (speechServiceRef.current) {
       speechServiceRef.current.stopRecognition()
     }
     setIsListening(false)
   }
 
-  const speakText = async (text: string) => {
+  const speakText = async (text: string): Promise<void> => {
     if (!speechServiceRef.current || isSpeaking) return
 
     setIsSpeaking(true)
@@ -171,15 +165,8 @@ export function Chatbot() {
     }
   }
 
-  const stopSpeaking = () => {
-    if (speechServiceRef.current) {
-      speechServiceRef.current.stopSynthesis()
-    }
-    setIsSpeaking(false)
-  }
-
-  const toggleLanguage = () => {
-    setLanguage((prev) => (prev === "en" ? "ne" : "en"))
+  const toggleLanguage = (): void => {
+    setLanguage((prev: Language) => (prev === "en" ? "ne" : "en"))
   }
 
   return (
@@ -233,7 +220,7 @@ export function Chatbot() {
           </div>
         )}
 
-        {messages.map((message) => (
+        {messages.map((message: Message) => (
           <div
             key={message.id}
             className={cn("flex gap-3 max-w-[85%]", message.role === "user" ? "ml-auto flex-row-reverse" : "")}
@@ -316,7 +303,7 @@ export function Chatbot() {
 
           <Input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
             placeholder={language === "en" ? "Type your message..." : "आफ्नो सन्देश टाइप गर्नुहोस्..."}
             disabled={isLoading || isListening}
             className="flex-1 bg-background"
