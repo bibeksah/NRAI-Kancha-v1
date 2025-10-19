@@ -898,13 +898,7 @@ export function Chatbot() {
             </div>
             {language === "en" ? "Listening..." : "सुन्दै..."}
           </div>
-        )}
-        
-        <div className="mt-2 text-xs text-muted-foreground text-center">
-          <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono">Ctrl+K</kbd> {language === "en" ? "clear" : "खाली"} • 
-          <kbd className="ml-2 px-1.5 py-0.5 rounded bg-muted font-mono">Ctrl+/</kbd> {language === "en" ? "settings" : "सेटिङ"} •
-          <kbd className="ml-2 px-1.5 py-0.5 rounded bg-muted font-mono">Enter</kbd> {language === "en" ? "send" : "पठाउन"}
-        </div>
+        )} 
       </footer>
 
       {/* Dialogs */}
