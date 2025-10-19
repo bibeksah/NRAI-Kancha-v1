@@ -48,16 +48,16 @@ interface Message {
 
 const EXAMPLE_PROMPTS = {
   en: [
-    "Tell me about Nepal's history",
-    "What is artificial intelligence?",
-    "Help me write an email",
-    "Explain quantum computing"
+    "How will the manifesto fight corruption?",
+    "How will it make the government stable?",
+    "How will it grow Nepal’s economy?",
+    "How will it digitize government services?"
   ],
   ne: [
-    "नेपालको इतिहासको बारेमा बताउनुहोस्",
-    "कृत्रिम बुद्धिमत्ता के हो?",
-    "मलाई इमेल लेख्न मद्दत गर्नुहोस्",
-    "क्वान्टम कम्प्युटिङ व्याख्या गर्नुहोस्"
+    "घोषणापत्रले भ्रष्टाचार कसरी नियन्त्रण गर्छ?",
+    "यसले सरकारलाई स्थिर कसरी बनाउँछ?",
+    "यसले नेपालको अर्थतन्त्र कसरी बढाउँछ?",
+    "यसले सरकारी सेवाहरूलाई डिजिटल कसरी बनाउँछ?"
   ]
 }
 
@@ -519,66 +519,71 @@ export function Chatbot() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-background via-background to-accent/5">
+    <div className="flex flex-col h-full bg-gradient-to-br from-background via-background to-accent/10 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
+      </div>
       {/* Offline indicator */}
       {!isOnline && (
-        <div className="bg-destructive text-destructive-foreground px-4 py-2 text-sm flex items-center justify-center gap-2 animate-slide-in" role="alert">
+        <div className="relative z-10 bg-destructive text-destructive-foreground px-4 py-3 text-sm flex items-center justify-center gap-2 animate-slide-in shadow-medium" role="alert">
           <WifiOff className="w-4 h-4" />
-          <span>{language === "en" ? "You are offline" : "तपाईं अफलाइन हुनुहुन्छ"}</span>
+          <span className="font-medium">{language === "en" ? "You are offline" : "तपाईं अफलाइन हुनुहुन्छ"}</span>
         </div>
       )}
 
       {/* Enhanced Header */}
       <header 
-        className="relative border-b border-border/50 bg-card/80 backdrop-blur-xl"
+        className="relative z-10 border-b border-border/40 bg-card/95 backdrop-blur-xl shadow-soft"
         role="banner"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5" />
-        <div className="relative flex items-center justify-between p-3 sm:p-4">
-          <div className="flex items-center gap-2 sm:gap-3">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] via-accent/[0.03] to-primary/[0.03]" />
+        <div className="relative flex items-center justify-between px-4 py-3.5 sm:px-6 sm:py-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <div className="relative" role="img" aria-label="NRAI Kancha logo">
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-md animate-pulse-glow" />
-              <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
+              <div className="absolute inset-0 bg-primary/25 rounded-full blur-lg animate-pulse-glow" />
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full gradient-bg flex items-center justify-center shadow-medium hover-lift">
+                <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground animate-pulse" />
               </div>
             </div>
             <div>
-              <h1 className="text-base sm:text-lg font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent tracking-tight">
                 NRAI Kancha
               </h1>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mt-0.5">
                 <div 
                   className={cn(
-                    "w-1.5 h-1.5 rounded-full animate-pulse",
-                    isOnline ? "bg-success" : "bg-destructive"
+                    "w-2 h-2 rounded-full animate-pulse",
+                    isOnline ? "bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)]" : "bg-destructive"
                   )} 
                   role="status"
                   aria-label={isOnline ? "Online" : "Offline"}
                 />
-                <span className="hidden sm:inline" aria-live="polite">
+                <span className="hidden sm:inline font-medium" aria-live="polite">
                   {isOnline ? (language === "en" ? "Online" : "अनलाइन") : (language === "en" ? "Offline" : "अफलाइन")}
                 </span>
                 {messages.length > 0 && (
                   <span className="text-xs" aria-label={`${messages.length} messages in conversation`}>
-                    • {messages.length} {language === "en" ? "messages" : "सन्देशहरू"}
+                    <span className="hidden sm:inline">•</span> {messages.length} {language === "en" ? "msg" : "सन्देश"}
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <nav className="flex items-center gap-1 sm:gap-2" aria-label="Main navigation">
+          <nav className="flex items-center gap-1.5 sm:gap-2" aria-label="Main navigation">
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleLanguage}
-              className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all"
+              className="h-9 w-9 sm:h-11 sm:w-11 text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-smooth rounded-xl touch-target"
               title={`Switch to ${language === "en" ? "Nepali" : "English"}`}
               aria-label={`Switch to ${language === "en" ? "Nepali" : "English"} language`}
             >
               <Languages className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
             <div 
-              className="px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-semibold rounded-full bg-gradient-to-r from-primary/10 to-accent/10 text-primary border border-primary/20"
+              className="px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-xl gradient-bg text-primary-foreground shadow-soft"
               aria-label={`Current language: ${language === "en" ? "English" : "Nepali"}`}
             >
               {language === "en" ? "EN" : "NE"}
@@ -589,7 +594,7 @@ export function Chatbot() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowClearDialog(true)}
-                  className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+                  className="h-9 w-9 sm:h-11 sm:w-11 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-smooth rounded-xl touch-target"
                   title="Clear chat (Ctrl+K)"
                   aria-label="Clear chat history"
                 >
@@ -599,7 +604,7 @@ export function Chatbot() {
                   variant="ghost"
                   size="icon"
                   onClick={() => exportChat('txt')}
-                  className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all"
+                  className="h-9 w-9 sm:h-11 sm:w-11 text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-smooth rounded-xl touch-target"
                   title="Export chat"
                   aria-label="Export chat history"
                 >
@@ -611,7 +616,7 @@ export function Chatbot() {
               variant="ghost"
               size="icon"
               onClick={() => setShowSettingsDialog(true)}
-              className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all"
+              className="h-9 w-9 sm:h-11 sm:w-11 text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-smooth rounded-xl touch-target"
               title="Settings (Ctrl+/)"
               aria-label="Open settings"
             >
@@ -624,41 +629,41 @@ export function Chatbot() {
       {/* Messages */}
       <main 
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 scroll-smooth"
+        className="relative z-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 space-y-4 sm:space-y-5 scroll-smooth"
         role="main"
         aria-label="Chat messages"
       >
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center animate-fade-in px-4">
-            <div className="relative mb-6">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full blur-2xl" />
-              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground" />
+          <div className="flex flex-col items-center justify-center h-full text-center animate-scale-in px-6 sm:px-8">
+            <div className="relative mb-8">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/25 to-accent/25 rounded-full blur-3xl" />
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full gradient-bg flex items-center justify-center shadow-strong hover-lift">
+                <Sparkles className="w-10 h-10 sm:w-12 sm:h-12 text-primary-foreground animate-pulse" />
               </div>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent tracking-tight">
               {language === "en" ? "Welcome to NRAI Kancha" : "NRAI Kancha मा स्वागत छ"}
             </h2>
-            <p className="text-muted-foreground max-w-md text-sm leading-relaxed mb-6">
+            <p className="text-muted-foreground max-w-lg text-sm sm:text-base leading-relaxed mb-8 font-medium">
               {language === "en"
                 ? "Your intelligent bilingual assistant. Start a conversation by typing or using voice input."
                 : "तपाईंको बुद्धिमान द्विभाषी सहायक। टाइप गरेर वा आवाज इनपुट प्रयोग गरेर कुराकानी सुरु गर्नुहोस्।"}
             </p>
             
             <div className="w-full max-w-2xl">
-              <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-3">
+              <p className="text-sm sm:text-base font-semibold text-muted-foreground mb-4">
                 {language === "en" ? "Try asking:" : "प्रयास गर्नुहोस्:"}
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2" role="list" aria-label="Example prompts">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="list" aria-label="Example prompts">
                 {EXAMPLE_PROMPTS[language].map((prompt, index) => (
                   <Button
                     key={index}
                     variant="outline"
-                    className="justify-start text-left h-auto py-3 px-4 hover:bg-accent/50 hover:border-primary/50 transition-all text-xs sm:text-sm"
+                    className="justify-start text-left h-auto py-4 px-5 hover:bg-accent/70 hover:border-primary/60 hover:shadow-medium transition-smooth rounded-2xl text-sm sm:text-base font-medium group"
                     onClick={() => sendMessage(prompt)}
                     aria-label={`Try asking: ${prompt}`}
                   >
-                    <MessageSquare className="w-4 h-4 mr-2 flex-shrink-0 text-primary" aria-hidden="true" />
+                    <MessageSquare className="w-5 h-5 mr-3 flex-shrink-0 text-primary group-hover:scale-110 transition-smooth" aria-hidden="true" />
                     <span className="line-clamp-2">{prompt}</span>
                   </Button>
                 ))}
@@ -671,17 +676,17 @@ export function Chatbot() {
           <article
             key={message.id}
             className={cn(
-              "flex gap-2 sm:gap-3 animate-slide-in group",
-              message.role === "user" ? "ml-auto flex-row-reverse max-w-[80%]" : "max-w-[90%]"
+              "flex gap-3 sm:gap-4 group",
+              message.role === "user" ? "ml-auto flex-row-reverse animate-slide-in-right max-w-[85%] sm:max-w-[80%]" : "animate-slide-in-left max-w-[92%] sm:max-w-[88%]"
             )}
             role="article"
           >
             <div
               className={cn(
-                "w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-xs",
+                "w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center flex-shrink-0 font-bold text-xs sm:text-sm shadow-medium transition-smooth",
                 message.role === "user"
-                  ? "bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg shadow-primary/25"
-                  : "bg-gradient-to-br from-secondary to-accent/30 text-secondary-foreground"
+                  ? "gradient-bg text-primary-foreground shadow-primary/30 hover-lift"
+                  : "bg-gradient-to-br from-secondary to-accent/40 text-secondary-foreground"
               )}
               aria-hidden="true"
             >
@@ -690,12 +695,12 @@ export function Chatbot() {
             <div className="flex-1 min-w-0">
               <Card
                 className={cn(
-                  "p-4 sm:p-5 rounded-2xl transition-all",
+                  "p-5 sm:p-6 rounded-3xl transition-smooth hover-lift",
                   message.role === "user"
-                    ? "bg-primary text-white shadow-lg shadow-primary/30"
+                    ? "gradient-bg text-white shadow-strong shadow-primary/20"
                     : message.error
-                    ? "bg-destructive/10 border-destructive/50 shadow-md hover:shadow-lg border"
-                    : "bg-card shadow-md hover:shadow-lg border border-border/50"
+                    ? "bg-destructive/10 border-destructive/50 shadow-medium hover:shadow-strong border-2"
+                    : "bg-card shadow-medium hover:shadow-strong border border-border/30"
                 )}
               >
                 {message.error && (
@@ -719,13 +724,13 @@ export function Chatbot() {
                 </div>
                 
                 <div className={cn(
-                  "flex items-center justify-between mt-3 pt-3 border-t",
-                  message.role === "user" ? "border-white/20" : "border-border/20"
+                  "flex items-center justify-between mt-4 pt-3.5 border-t",
+                  message.role === "user" ? "border-white/15" : "border-border/30"
                 )}>
                   <time 
                     className={cn(
-                      "text-xs",
-                      message.role === "user" ? "text-white/80" : "text-muted-foreground"
+                      "text-xs sm:text-sm font-medium",
+                      message.role === "user" ? "text-white/75" : "text-muted-foreground"
                     )}
                     dateTime={message.timestamp.toISOString()}
                   >
@@ -734,20 +739,20 @@ export function Chatbot() {
                       : new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </time>
                   
-                  <div className="flex items-center gap-1 transition-opacity" role="toolbar">
+                  <div className="flex items-center gap-1.5 transition-opacity" role="toolbar">
                     {message.error ? (
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 transition-all"
+                        className="h-8 w-8 sm:h-9 sm:w-9 text-destructive hover:text-destructive hover:bg-destructive/15 transition-smooth rounded-xl touch-target"
                         onClick={() => retryMessage(message.id)}
                         disabled={retryingMessageId === message.id}
                         aria-label="Retry message"
                       >
                         {retryingMessageId === message.id ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                         ) : (
-                          <RefreshCw className="w-3.5 h-3.5" />
+                          <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
                         )}
                       </Button>
                     ) : (
@@ -756,18 +761,18 @@ export function Chatbot() {
                           variant="ghost"
                           size="icon"
                           className={cn(
-                            "h-7 w-7 transition-all",
+                            "h-8 w-8 sm:h-9 sm:w-9 transition-smooth rounded-xl touch-target",
                             message.role === "user" 
-                              ? "text-white/80 hover:text-white hover:bg-white/10" 
-                              : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                              ? "text-white/75 hover:text-white hover:bg-white/15" 
+                              : "text-muted-foreground hover:text-foreground hover:bg-accent/70"
                           )}
                           onClick={() => copyMessage(message.content, message.id)}
                           aria-label="Copy message"
                         >
                           {copiedId === message.id ? (
-                            <Check className="w-3.5 h-3.5" />
+                            <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                           ) : (
-                            <Copy className="w-3.5 h-3.5" />
+                            <Copy className="w-4 h-4 sm:w-5 sm:h-5" />
                           )}
                         </Button>
                         
@@ -776,24 +781,24 @@ export function Chatbot() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+                              className="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground hover:bg-accent/70 transition-smooth rounded-xl touch-target"
                               onClick={() => speakText(message.content)}
                               disabled={isSpeaking}
                               aria-label="Read aloud"
                             >
-                              <Volume2 className="w-3.5 h-3.5" />
+                              <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
                             </Button>
                             
                             {index === messages.length - 1 && (
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-accent transition-all"
+                                className="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground hover:bg-accent/70 transition-smooth rounded-xl touch-target"
                                 onClick={regenerateResponse}
                                 disabled={isLoading}
                                 aria-label="Regenerate"
                               >
-                                <RefreshCw className="w-3.5 h-3.5" />
+                                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
                               </Button>
                             )}
                           </>
@@ -803,15 +808,15 @@ export function Chatbot() {
                           variant="ghost"
                           size="icon"
                           className={cn(
-                            "h-7 w-7 transition-all",
+                            "h-8 w-8 sm:h-9 sm:w-9 transition-smooth rounded-xl touch-target",
                             message.role === "user" 
-                              ? "text-white/80 hover:text-white hover:bg-white/10" 
-                              : "text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              ? "text-white/75 hover:text-white hover:bg-white/15" 
+                              : "text-muted-foreground hover:text-destructive hover:bg-destructive/15"
                           )}
                           onClick={() => deleteMessage(message.id)}
                           aria-label="Delete"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                         </Button>
                       </>
                     )}
@@ -823,18 +828,18 @@ export function Chatbot() {
         ))}
 
         {isLoading && (
-          <div className="flex gap-2 sm:gap-3 max-w-[95%] animate-slide-in" role="status" aria-live="polite">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-secondary to-accent/30 text-secondary-foreground flex items-center justify-center flex-shrink-0 font-semibold text-xs">
+          <div className="flex gap-3 sm:gap-4 max-w-[92%] sm:max-w-[88%] animate-slide-in-left" role="status" aria-live="polite">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-secondary to-accent/40 text-secondary-foreground flex items-center justify-center flex-shrink-0 font-bold text-xs sm:text-sm shadow-medium">
               AI
             </div>
-            <Card className="p-4 rounded-2xl bg-card shadow-md border border-border/50">
-              <div className="flex items-center gap-3">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+            <Card className="p-5 sm:p-6 rounded-3xl bg-card shadow-medium border border-border/30">
+              <div className="flex items-center gap-4">
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce shadow-sm" style={{ animationDelay: "0ms" }} />
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce shadow-sm" style={{ animationDelay: "150ms" }} />
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce shadow-sm" style={{ animationDelay: "300ms" }} />
                 </div>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm sm:text-base font-medium text-muted-foreground">
                   {language === "en" ? "Thinking..." : "सोच्दै..."}
                 </span>
               </div>
@@ -846,8 +851,8 @@ export function Chatbot() {
       </main>
 
       {/* Enhanced Input */}
-      <footer className="p-3 sm:p-4 border-t border-border/50 bg-card/80 backdrop-blur-xl" role="contentinfo">
-        <form onSubmit={handleSubmit} className="flex gap-2">
+  <footer className="relative z-10 px-4 py-4 sm:px-6 sm:py-5 border-t border-border/40 bg-card/95 backdrop-blur-xl shadow-[0_-4px_16px_-4px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]" role="contentinfo">
+        <form onSubmit={handleSubmit} className="flex gap-2.5 sm:gap-3">
           <Button
             type="button"
             variant={isListening ? "default" : "outline"}
@@ -855,12 +860,12 @@ export function Chatbot() {
             onClick={isListening ? stopListening : startListening}
             disabled={isLoading || !isOnline}
             className={cn(
-              "flex-shrink-0 h-10 w-10 sm:h-11 sm:w-11 transition-all",
-              isListening && "bg-destructive hover:bg-destructive/90 shadow-lg shadow-destructive/30 animate-pulse"
+              "flex-shrink-0 h-12 w-12 sm:h-12 sm:w-12 transition-smooth rounded-2xl touch-target",
+              isListening && "bg-destructive hover:bg-destructive/90 shadow-strong shadow-destructive/25 animate-pulse"
             )}
             aria-label={isListening ? "Stop voice input" : "Start voice input"}
           >
-            {isListening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
+            {isListening ? <MicOff className="w-5 h-5 sm:w-6 sm:h-6" /> : <Mic className="w-5 h-5 sm:w-6 sm:h-6" />}
           </Button>
 
           <Textarea
@@ -870,7 +875,7 @@ export function Chatbot() {
             onKeyDown={handleKeyDown}
             placeholder={language === "en" ? "Type your message..." : "आफ्नो सन्देश टाइप गर्नुहोस्..."}
             disabled={isLoading || isListening || !isOnline}
-            className="flex-1 min-h-[40px] max-h-[150px] resize-none bg-background text-foreground placeholder:text-muted-foreground border-border/50 focus:border-primary/50 transition-all text-sm sm:text-base py-2 sm:py-2.5"
+            className="flex-1 min-h-[48px] max-h-[150px] resize-none bg-background text-foreground placeholder:text-muted-foreground border-border/40 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-smooth text-base sm:text-lg py-3 sm:py-3.5 px-4 rounded-2xl"
             rows={1}
             aria-label="Message input"
           />
@@ -879,22 +884,22 @@ export function Chatbot() {
             type="submit"
             size="icon"
             disabled={isLoading || !input.trim() || isListening || !isOnline}
-            className="flex-shrink-0 h-10 w-10 sm:h-11 sm:w-11 bg-gradient-to-r from-primary to-accent hover:shadow-lg hover:shadow-primary/30 transition-all disabled:opacity-50"
+            className="flex-shrink-0 h-12 w-12 sm:h-12 sm:w-12 gradient-bg hover:shadow-strong hover:shadow-primary/25 transition-smooth disabled:opacity-50 rounded-2xl touch-target"
             aria-label="Send message"
           >
             {isLoading ? (
-              <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+              <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" />
             ) : (
-              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Send className="w-5 h-5 sm:w-6 sm:h-6" />
             )}
           </Button>
         </form>
 
         {isListening && (
-          <div className="mt-3 flex items-center justify-center gap-2 text-sm text-destructive animate-pulse" role="status" aria-live="polite">
+          <div className="mt-4 flex items-center justify-center gap-3 text-sm sm:text-base font-semibold text-destructive animate-pulse" role="status" aria-live="polite">
             <div className="relative">
-              <div className="w-2 h-2 rounded-full bg-destructive" />
-              <div className="absolute inset-0 w-2 h-2 rounded-full bg-destructive animate-ping" />
+              <div className="w-2.5 h-2.5 rounded-full bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+              <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-destructive animate-ping" />
             </div>
             {language === "en" ? "Listening..." : "सुन्दै..."}
           </div>

@@ -4,40 +4,44 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Modern Blue-Purple Theme */
-  --background: oklch(0.98 0.005 264);
-  --foreground: oklch(0.15 0.01 264);
+  /* Modern Blue-Purple Theme with Enhanced Vibrancy */
+  --background: oklch(0.99 0.003 264);
+  --foreground: oklch(0.12 0.015 264);
   
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.01 264);
+  --card-foreground: oklch(0.12 0.015 264);
   
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.01 264);
+  --popover-foreground: oklch(0.12 0.015 264);
   
-  /* Primary: Blue-Purple Gradient */
-  --primary: oklch(0.55 0.22 264);
+  /* Primary: Vibrant Blue-Purple Gradient */
+  --primary: oklch(0.58 0.25 270);
   --primary-foreground: oklch(0.99 0 0);
   
-  /* Secondary: Lighter purple */
-  --secondary: oklch(0.95 0.02 264);
-  --secondary-foreground: oklch(0.35 0.15 264);
+  /* Secondary: Softer purple */
+  --secondary: oklch(0.96 0.025 270);
+  --secondary-foreground: oklch(0.32 0.18 270);
   
-  --muted: oklch(0.96 0.01 264);
-  --muted-foreground: oklch(0.5 0.02 264);
+  --muted: oklch(0.97 0.008 264);
+  --muted-foreground: oklch(0.48 0.025 264);
   
-  --accent: oklch(0.93 0.05 280);
-  --accent-foreground: oklch(0.35 0.15 264);
+  --accent: oklch(0.94 0.04 285);
+  --accent-foreground: oklch(0.32 0.18 270);
   
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(0.58 0.25 27);
   --destructive-foreground: oklch(0.99 0 0);
   
-  --success: oklch(0.65 0.18 145);
+  --success: oklch(0.68 0.19 150);
   
-  --border: oklch(0.92 0.01 264);
-  --input: oklch(0.94 0.01 264);
-  --ring: oklch(0.55 0.22 264);
+  --border: oklch(0.93 0.008 264);
+  --input: oklch(0.96 0.008 264);
+  --ring: oklch(0.58 0.25 270);
   
-  --radius: 0.75rem;
+  --radius: 1rem;
+  
+  /* Gradient colors for enhanced visuals */
+  --gradient-from: oklch(0.58 0.25 270);
+  --gradient-to: oklch(0.62 0.22 285);
 }
 
 @theme inline {
@@ -80,11 +84,33 @@
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(15px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
@@ -94,6 +120,17 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
@@ -107,11 +144,23 @@
 }
 
 .animate-slide-in {
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-pulse-glow {
@@ -157,10 +206,17 @@
 
 /* Enhanced Markdown Styling */
 .markdown-content {
-  line-height: 1.75;
+  line-height: 1.8;
   color: var(--card-foreground);
   word-wrap: break-word;
   overflow-wrap: break-word;
+  font-size: 0.9375rem;
+}
+
+@media (min-width: 640px) {
+  .markdown-content {
+    font-size: 1rem;
+  }
 }
 
 .markdown-content > *:first-child {
@@ -394,4 +450,77 @@
 
 .user-message-content * {
   color: white !important;
+}
+
+/* Glassmorphism effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Smooth gradient background */
+.gradient-bg {
+  background: linear-gradient(135deg, var(--gradient-from) 0%, var(--gradient-to) 100%);
+}
+
+/* Enhanced shadow utilities */
+.shadow-soft {
+  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.08),
+              0 4px 16px -4px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-medium {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1),
+              0 8px 24px -4px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-strong {
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.12),
+              0 16px 48px -8px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover lift effect */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Smooth transitions for interactive elements */
+.transition-smooth {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }

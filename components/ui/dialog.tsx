@@ -11,15 +11,15 @@ const Dialog = React.forwardRef<
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       <div 
-        className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+        className="fixed inset-0 bg-background/90 backdrop-blur-md animate-fade-in"
         onClick={() => onOpenChange?.(false)}
       />
       <div
         ref={ref}
         className={cn(
-          "relative z-50 w-full max-w-lg bg-card rounded-lg shadow-lg border border-border p-6 animate-fade-in",
+          "relative z-50 w-full max-w-lg bg-card rounded-3xl shadow-strong border border-border/50 p-6 sm:p-8 animate-scale-in",
           className
         )}
         {...props}
@@ -37,7 +37,7 @@ const DialogHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 text-center sm:text-left mb-4", className)}
+    className={cn("flex flex-col space-y-2 text-center sm:text-left mb-6", className)}
     {...props}
   />
 ))
@@ -49,7 +49,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h2
     ref={ref}
-    className={cn("text-lg font-semibold leading-none tracking-tight", className)}
+    className={cn("text-xl sm:text-2xl font-bold leading-tight tracking-tight", className)}
     {...props}
   />
 ))
@@ -61,7 +61,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm sm:text-base text-muted-foreground leading-relaxed", className)}
     {...props}
   />
 ))
@@ -73,7 +73,7 @@ const DialogFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 mt-4", className)}
+    className={cn("flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-3 mt-6", className)}
     {...props}
   />
 ))
