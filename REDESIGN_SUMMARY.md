@@ -59,23 +59,23 @@
 ## 🚀 How to Activate the New Design
 
 ### Option 1: Replace the Original (Recommended)
-```bash
+\`\`\`bash
 # Backup the original
 mv components/chatbot.tsx components/chatbot-old-backup.tsx
 
 # Activate the new design
 mv components/chatbot-redesigned.tsx components/chatbot.tsx
-```
+\`\`\`
 
 ### Option 2: Update the Import
 Change in `app/page.tsx`:
-```typescript
+\`\`\`typescript
 // Before
 import { Chatbot } from "@/components/chatbot"
 
 // After  
 import { Chatbot } from "@/components/chatbot-redesigned"
-```
+\`\`\`
 
 ### Option 3: Keep Both (Testing)
 Leave both files and switch between them during testing by changing the import statement.
@@ -113,7 +113,7 @@ Leave both files and switch between them during testing by changing the import s
 ## 🔧 Technical Improvements
 
 ### Animation System
-```typescript
+\`\`\`typescript
 // Example: Message entrance animation
 const messageVariants = {
   hidden: { opacity: 0, y: 20, scale: 0.98 },
@@ -128,10 +128,10 @@ const messageVariants = {
     }
   }
 }
-```
+\`\`\`
 
 ### Message Block Styling
-```css
+\`\`\`css
 /* User Message */
 .message-block-user {
   border-left: 4px solid var(--primary);
@@ -144,10 +144,10 @@ const messageVariants = {
   border-left: 4px solid var(--muted);
   padding-left: 1.25rem;
 }
-```
+\`\`\`
 
 ### Responsive Typography
-```css
+\`\`\`css
 .message-content {
   font-size: 0.9375rem;  /* 15px mobile */
   line-height: 1.75;      /* Better readability */
@@ -158,7 +158,7 @@ const messageVariants = {
     font-size: 1rem;      /* 16px desktop */
   }
 }
-```
+\`\`\`
 
 ## 📱 Mobile Experience
 
@@ -273,7 +273,7 @@ const messageVariants = {
 
 ## 💻 Development Commands
 
-```bash
+\`\`\`bash
 # Install dependencies
 npm install
 
@@ -285,7 +285,7 @@ npm run build
 
 # Start production server
 npm start
-```
+\`\`\`
 
 ## 📞 Support
 

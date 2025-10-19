@@ -5,32 +5,24 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card } from "@/components/ui/card"
-import { 
-  Dialog,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from "@/components/ui/dialog"
-import { 
-  Mic, 
-  MicOff, 
-  Volume2, 
-  VolumeX, 
-  Send, 
-  Loader2, 
-  Languages, 
-  Copy, 
-  Trash2, 
+import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import {
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Send,
+  Loader2,
+  Copy,
+  Trash2,
   RefreshCw,
   Check,
   Sparkles,
   Trash,
   Download,
   Settings,
-  MessageSquare,
   AlertCircle,
-  WifiOff
+  WifiOff,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SpeechService, type Language } from "@/lib/speech-service"
@@ -48,17 +40,17 @@ interface Message {
 
 const EXAMPLE_PROMPTS = {
   en: [
-    "How will the manifesto fight corruption?",
-    "How will it make the government stable?",
-    "How will it grow Nepal’s economy?",
-    "How will it digitize government services?"
+    "How this manifesto fights corruption?",
+    "How it makes the government stable?",
+    "How it grosw Nepal's economy?",
+    "How it digitizes government services?",
   ],
   ne: [
-    "घोषणापत्रले भ्रष्टाचार कसरी नियन्त्रण गर्छ?",
-    "यसले सरकारलाई स्थिर कसरी बनाउँछ?",
+    "घोषणापत्रले भ्रष्टाचारसँग कसरी लड्छ?",
+    "यसले सरकारलाई कसरी स्थिर बनाउँछ?",
     "यसले नेपालको अर्थतन्त्र कसरी बढाउँछ?",
-    "यसले सरकारी सेवाहरूलाई डिजिटल कसरी बनाउँछ?"
-  ]
+    "यसले सरकारी सेवाहरूलाई कसरी डिजिटल बनाउँछ?",
+  ],
 }
 
 export function Chatbot() {
@@ -83,13 +75,13 @@ export function Chatbot() {
   useEffect(() => {
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
-    
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-    
+
+    window.addEventListener("online", handleOnline)
+    window.addEventListener("offline", handleOffline)
+
     return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
+      window.removeEventListener("online", handleOnline)
+      window.removeEventListener("offline", handleOffline)
     }
   }, [])
 
@@ -102,7 +94,7 @@ export function Chatbot() {
           const parsed = JSON.parse(savedMessages)
           const messagesWithDates = parsed.map((msg: any) => ({
             ...msg,
-            timestamp: new Date(msg.timestamp)
+            timestamp: new Date(msg.timestamp),
           }))
           setMessages(messagesWithDates)
         } catch (error) {
@@ -160,34 +152,34 @@ export function Chatbot() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === 'k') {
+      if (e.ctrlKey && e.key === "k") {
         e.preventDefault()
         setShowClearDialog(true)
       }
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setShowClearDialog(false)
         setShowSettingsDialog(false)
       }
-      if (e.ctrlKey && e.key === '/') {
+      if (e.ctrlKey && e.key === "/") {
         e.preventDefault()
         setShowSettingsDialog(true)
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
   }, [])
 
   // Focus management for accessibility
   useEffect(() => {
     if (showClearDialog || showSettingsDialog) {
       const handleTabKey = (e: KeyboardEvent) => {
-        if (e.key === 'Tab') {
+        if (e.key === "Tab") {
           // Simple focus trap
         }
       }
-      window.addEventListener('keydown', handleTabKey)
-      return () => window.removeEventListener('keydown', handleTabKey)
+      window.addEventListener("keydown", handleTabKey)
+      return () => window.removeEventListener("keydown", handleTabKey)
     }
   }, [showClearDialog, showSettingsDialog])
 
@@ -207,18 +199,19 @@ export function Chatbot() {
     }
   }
 
-  const sendMessage = async (text: string, isRetry: boolean = false, originalMessageId?: string) => {
+  const sendMessage = async (text: string, isRetry = false, originalMessageId?: string) => {
     if (!text.trim()) return
 
     if (!isOnline) {
       const errorMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
-        content: language === "en" 
-          ? "You appear to be offline. Please check your internet connection and try again."
-          : "तपाईं अफलाइन देखिनुहुन्छ। कृपया आफ्नो इन्टरनेट जडान जाँच गर्नुहोस् र फेरि प्रयास गर्नुहोस्।",
+        content:
+          language === "en"
+            ? "You appear to be offline. Please check your internet connection and try again."
+            : "तपाईं अफलाइन देखिनुहुन्छ। कृपया आफ्नो इन्टरनेट जडान जाँच गर्नुहोस् र फेरि प्रयास गर्नुहोस्।",
         timestamp: new Date(),
-        error: true
+        error: true,
       }
       setMessages((prev) => [...prev, errorMessage])
       return
@@ -241,7 +234,7 @@ export function Chatbot() {
     }
 
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = "auto"
     }
 
     try {
@@ -270,7 +263,7 @@ export function Chatbot() {
         const messagesWithDates = data.messages.map((msg: any) => ({
           ...msg,
           timestamp: new Date(msg.timestamp),
-          error: false
+          error: false,
         }))
         setMessages(messagesWithDates)
 
@@ -283,32 +276,36 @@ export function Chatbot() {
       }
     } catch (error) {
       console.error("[NRAI Kancha] Failed to send message:", error)
-      
+
       if (isRetry && originalMessageId) {
-        setMessages((prev) => prev.map(msg => 
-          msg.id === originalMessageId 
-            ? { 
-                ...msg, 
-                content: error instanceof Error 
-                  ? `${language === "en" ? "Error" : "त्रुटि"}: ${error.message}` 
-                  : language === "en" 
-                    ? "Sorry, I encountered an error. Please try again."
-                    : "माफ गर्नुहोस्, मैले त्रुटि सामना गरें। कृपया फेरि प्रयास गर्नुहोस्।",
-                error: true
-              }
-            : msg
-        ))
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === originalMessageId
+              ? {
+                  ...msg,
+                  content:
+                    error instanceof Error
+                      ? `${language === "en" ? "Error" : "त्रुटि"}: ${error.message}`
+                      : language === "en"
+                        ? "Sorry, I encountered an error. Please try again."
+                        : "माफ गर्नुहोस्, मैले त्रुटि सामना गरें। कृपया फेरि प्रयास गर्नुहोस्।",
+                  error: true,
+                }
+              : msg,
+          ),
+        )
       } else {
         const errorMessage: Message = {
           id: Date.now().toString(),
           role: "assistant",
-          content: error instanceof Error 
-            ? `${language === "en" ? "Error" : "त्रुटि"}: ${error.message}` 
-            : language === "en" 
-              ? "Sorry, I encountered an error. Please try again."
-              : "माफ गर्नुहोस्, मैले त्रुटि सामना गरें। कृपया फेरि प्रयास गर्नुहोस्।",
+          content:
+            error instanceof Error
+              ? `${language === "en" ? "Error" : "त्रुटि"}: ${error.message}`
+              : language === "en"
+                ? "Sorry, I encountered an error. Please try again."
+                : "माफ गर्नुहोस्, मैले त्रुटि सामना गरें। कृपया फेरि प्रयास गर्नुहोस्।",
           timestamp: new Date(),
-          error: true
+          error: true,
         }
         setMessages((prev) => [...prev, errorMessage])
       }
@@ -319,11 +316,14 @@ export function Chatbot() {
   }
 
   const retryMessage = (messageId: string) => {
-    const messageIndex = messages.findIndex(msg => msg.id === messageId)
+    const messageIndex = messages.findIndex((msg) => msg.id === messageId)
     if (messageIndex > 0) {
-      const previousUserMessage = [...messages].slice(0, messageIndex).reverse().find(msg => msg.role === "user")
+      const previousUserMessage = [...messages]
+        .slice(0, messageIndex)
+        .reverse()
+        .find((msg) => msg.role === "user")
       if (previousUserMessage) {
-        setMessages(prev => prev.filter(msg => msg.id !== messageId))
+        setMessages((prev) => prev.filter((msg) => msg.id !== messageId))
         sendMessage(previousUserMessage.content, true, messageId)
       }
     }
@@ -335,7 +335,7 @@ export function Chatbot() {
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       sendMessage(input)
     }
@@ -343,8 +343,8 @@ export function Chatbot() {
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value)
-    e.target.style.height = 'auto'
-    e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px'
+    e.target.style.height = "auto"
+    e.target.style.height = Math.min(e.target.scrollHeight, 150) + "px"
   }
 
   const startListening = async () => {
@@ -410,13 +410,13 @@ export function Chatbot() {
 
   const regenerateResponse = async () => {
     if (messages.length < 2) return
-    
-    const lastUserMessage = [...messages].reverse().find(msg => msg.role === "user")
+
+    const lastUserMessage = [...messages].reverse().find((msg) => msg.role === "user")
     if (!lastUserMessage) return
 
-    const indexOfLastUser = messages.findIndex(msg => msg.id === lastUserMessage.id)
+    const indexOfLastUser = messages.findIndex((msg) => msg.id === lastUserMessage.id)
     setMessages(messages.slice(0, indexOfLastUser + 1))
-    
+
     await sendMessage(lastUserMessage.content)
   }
 
@@ -424,43 +424,45 @@ export function Chatbot() {
     setMessages([])
     localStorage.removeItem("nrai-kancha-messages")
     setShowClearDialog(false)
-    
+
     const announcement = language === "en" ? "Chat cleared" : "कुराकानी खाली गरियो"
     announceToScreenReader(announcement)
   }
 
-  const exportChat = (format: 'txt' | 'json') => {
-    let content = ''
-    let filename = `nrai-kancha-chat-${new Date().toISOString().split('T')[0]}`
+  const exportChat = (format: "txt" | "json") => {
+    let content = ""
+    let filename = `nrai-kancha-chat-${new Date().toISOString().split("T")[0]}`
 
-    if (format === 'json') {
+    if (format === "json") {
       content = JSON.stringify(messages, null, 2)
-      filename += '.json'
+      filename += ".json"
     } else {
-      content = messages.map(msg => {
-        const time = msg.timestamp.toLocaleString()
-        return `[${time}] ${msg.role.toUpperCase()}: ${msg.content}\n`
-      }).join('\n')
-      filename += '.txt'
+      content = messages
+        .map((msg) => {
+          const time = msg.timestamp.toLocaleString()
+          return `[${time}] ${msg.role.toUpperCase()}: ${msg.content}\n`
+        })
+        .join("\n")
+      filename += ".txt"
     }
 
-    const blob = new Blob([content], { type: format === 'json' ? 'application/json' : 'text/plain' })
+    const blob = new Blob([content], { type: format === "json" ? "application/json" : "text/plain" })
     const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
+    const a = document.createElement("a")
     a.href = url
     a.download = filename
     a.click()
     URL.revokeObjectURL(url)
-    
+
     const announcement = language === "en" ? "Chat exported" : "कुराकानी निर्यात गरियो"
     announceToScreenReader(announcement)
   }
 
   const announceToScreenReader = (message: string) => {
-    const announcement = document.createElement('div')
-    announcement.setAttribute('role', 'status')
-    announcement.setAttribute('aria-live', 'polite')
-    announcement.className = 'sr-only'
+    const announcement = document.createElement("div")
+    announcement.setAttribute("role", "status")
+    announcement.setAttribute("aria-live", "polite")
+    announcement.className = "sr-only"
     announcement.textContent = message
     document.body.appendChild(announcement)
     setTimeout(() => document.body.removeChild(announcement), 1000)
@@ -468,23 +470,23 @@ export function Chatbot() {
 
   // Preprocess markdown to ensure proper formatting
   const preprocessMarkdown = (content: string): string => {
-    let processed = content;
-    
+    let processed = content
+
     // Fix numbered lists that are on the same line
     // Pattern: "text. 2." should become "text.\n2."
-    processed = processed.replace(/\.\s+(\d+)\.\s+/g, '.\n\n$1. ');
-    
+    processed = processed.replace(/\.\s+(\d+)\.\s+/g, ".\n\n$1. ")
+
     // Ensure headings are at the start of a line and have proper spacing
     // Replace patterns like "text ### Heading" with "text\n\n### Heading"
-    processed = processed.replace(/([^\n])(\s*)(#{1,6}\s+)/g, '$1\n\n$3');
-    
+    processed = processed.replace(/([^\n])(\s*)(#{1,6}\s+)/g, "$1\n\n$3")
+
     // Clean up any triple or more newlines
-    processed = processed.replace(/\n{3,}/g, '\n\n');
-    
+    processed = processed.replace(/\n{3,}/g, "\n\n")
+
     // Ensure proper spacing after headings
-    processed = processed.replace(/(#{1,6}\s+[^\n]+)\n([^\n#])/g, '$1\n\n$2');
-    
-    return processed.trim();
+    processed = processed.replace(/(#{1,6}\s+[^\n]+)\n([^\n#])/g, "$1\n\n$2")
+
+    return processed.trim()
   }
 
   // Custom components for ReactMarkdown to ensure proper rendering
@@ -499,13 +501,22 @@ export function Chatbot() {
     ul: (props) => <ul className="list-disc list-outside ml-6 my-3 space-y-1" {...props} />,
     ol: (props) => <ol className="list-decimal list-outside ml-6 my-3 space-y-1" {...props} />,
     li: (props) => <li className="pl-1 text-foreground" {...props} />,
-    a: (props) => <a className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors font-normal" {...props} />,
-    code: ({inline, ...props}) => 
-      inline ? 
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props} /> : 
-        <code className="block bg-muted p-4 rounded-lg overflow-x-auto my-3 text-sm" {...props} />,
+    a: (props) => (
+      <a
+        className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors font-normal"
+        {...props}
+      />
+    ),
+    code: ({ inline, ...props }) =>
+      inline ? (
+        <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
+      ) : (
+        <code className="block bg-muted p-4 rounded-lg overflow-x-auto my-3 text-sm" {...props} />
+      ),
     pre: (props) => <pre className="bg-muted p-4 rounded-lg overflow-x-auto my-3" {...props} />,
-    blockquote: (props) => <blockquote className="border-l-4 border-primary/30 pl-4 italic my-3 text-muted-foreground" {...props} />,
+    blockquote: (props) => (
+      <blockquote className="border-l-4 border-primary/30 pl-4 italic my-3 text-muted-foreground" {...props} />
+    ),
     hr: (props) => <hr className="border-t border-border my-6" {...props} />,
     table: (props) => <table className="w-full border-collapse my-4" {...props} />,
     thead: (props) => <thead className="border-b-2 border-border" {...props} />,
@@ -519,7 +530,7 @@ export function Chatbot() {
   }
 
   return (
-    <div className="flex flex-col min-h-[100dvh] w-full bg-gradient-to-br from-background via-background to-accent/10 relative overflow-hidden">
+    <div className="flex flex-col h-[100dvh] w-full bg-gradient-to-br from-background via-background to-accent/10 relative overflow-hidden">
       {/* Decorative background elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
@@ -527,15 +538,18 @@ export function Chatbot() {
       </div>
       {/* Offline indicator */}
       {!isOnline && (
-        <div className="relative z-10 bg-destructive text-destructive-foreground px-4 py-3 text-sm flex items-center justify-center gap-2 animate-slide-in shadow-medium" role="alert">
+        <div
+          className="fixed top-0 left-0 right-0 z-50 bg-destructive text-destructive-foreground px-4 py-3 text-sm flex items-center justify-center gap-2 animate-slide-in shadow-medium"
+          role="alert"
+        >
           <WifiOff className="w-4 h-4" />
           <span className="font-medium">{language === "en" ? "You are offline" : "तपाईं अफलाइन हुनुहुन्छ"}</span>
         </div>
       )}
 
       {/* Enhanced Header */}
-      <header 
-        className="sticky top-0 z-20 border-b border-border/40 bg-card/95 backdrop-blur-xl shadow-soft"
+      <header
+        className="fixed top-0 left-0 right-0 z-20 border-b border-border/40 bg-card/95 backdrop-blur-xl shadow-soft"
         role="banner"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] via-accent/[0.03] to-primary/[0.03]" />
@@ -552,16 +566,16 @@ export function Chatbot() {
                 NRAI Kancha
               </h1>
               <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mt-0.5">
-                <div 
+                <div
                   className={cn(
                     "w-2 h-2 rounded-full animate-pulse",
-                    isOnline ? "bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)]" : "bg-destructive"
-                  )} 
+                    isOnline ? "bg-success shadow-[0_0_8px_rgba(34,197,94,0.5)]" : "bg-destructive",
+                  )}
                   role="status"
                   aria-label={isOnline ? "Online" : "Offline"}
                 />
                 <span className="hidden sm:inline font-medium" aria-live="polite">
-                  {isOnline ? (language === "en" ? "Online" : "अनलाइन") : (language === "en" ? "Offline" : "अफलाइन")}
+                  {isOnline ? (language === "en" ? "Online" : "अनलाइन") : language === "en" ? "Offline" : "अफलाइन"}
                 </span>
                 {messages.length > 0 && (
                   <span className="text-xs" aria-label={`${messages.length} messages in conversation`}>
@@ -572,46 +586,12 @@ export function Chatbot() {
             </div>
           </div>
           <nav className="flex items-center gap-1.5 sm:gap-2" aria-label="Main navigation">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleLanguage}
-              className="h-9 w-9 sm:h-11 sm:w-11 text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-smooth rounded-xl touch-target"
-              title={`Switch to ${language === "en" ? "Nepali" : "English"}`}
-              aria-label={`Switch to ${language === "en" ? "Nepali" : "English"} language`}
-            >
-              <Languages className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
-            <div 
+            <div
               className="px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-xl gradient-bg text-primary-foreground shadow-soft"
               aria-label={`Current language: ${language === "en" ? "English" : "Nepali"}`}
             >
               {language === "en" ? "EN" : "NE"}
             </div>
-            {messages.length > 0 && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowClearDialog(true)}
-                  className="h-9 w-9 sm:h-11 sm:w-11 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-smooth rounded-xl touch-target"
-                  title="Clear chat (Ctrl+K)"
-                  aria-label="Clear chat history"
-                >
-                  <Trash className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => exportChat('txt')}
-                  className="h-9 w-9 sm:h-11 sm:w-11 text-muted-foreground hover:text-foreground hover:bg-accent/60 transition-smooth rounded-xl touch-target"
-                  title="Export chat"
-                  aria-label="Export chat history"
-                >
-                  <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Button>
-              </>
-            )}
             <Button
               variant="ghost"
               size="icon"
@@ -627,9 +607,9 @@ export function Chatbot() {
       </header>
 
       {/* Messages */}
-      <main 
+      <main
         ref={messagesContainerRef}
-        className="relative z-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 space-y-4 sm:space-y-5 pb-28 sm:pb-32 scroll-smooth"
+        className="relative z-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 space-y-4 sm:space-y-5 pt-[72px] sm:pt-[80px] pb-28 sm:pb-32 scroll-smooth"
         role="main"
         aria-label="Chat messages"
       >
@@ -649,7 +629,7 @@ export function Chatbot() {
                 ? "Your intelligent bilingual assistant. Start a conversation by typing or using voice input."
                 : "तपाईंको बुद्धिमान द्विभाषी सहायक। टाइप गरेर वा आवाज इनपुट प्रयोग गरेर कुराकानी सुरु गर्नुहोस्।"}
             </p>
-            
+
             <div className="w-full max-w-2xl">
               <p className="text-sm sm:text-base font-semibold text-muted-foreground mb-4">
                 {language === "en" ? "Try asking:" : "प्रयास गर्नुहोस्:"}
@@ -659,12 +639,11 @@ export function Chatbot() {
                   <Button
                     key={index}
                     variant="outline"
-                    className="justify-start text-left h-auto py-4 px-5 hover:bg-accent/70 hover:border-primary/60 hover:shadow-medium transition-smooth rounded-2xl text-sm sm:text-base font-medium group"
+                    className="justify-start text-left h-auto py-4 px-5 hover:bg-accent/70 hover:border-primary/60 hover:shadow-medium transition-smooth rounded-2xl text-sm sm:text-base font-medium group bg-transparent"
                     onClick={() => sendMessage(prompt)}
                     aria-label={`Try asking: ${prompt}`}
                   >
-                    <MessageSquare className="w-5 h-5 mr-3 flex-shrink-0 text-primary group-hover:scale-110 transition-smooth" aria-hidden="true" />
-                    <span className="line-clamp-2">{prompt}</span>
+                    <span className="line-clamp-2 font-normal">{prompt}</span>
                   </Button>
                 ))}
               </div>
@@ -677,7 +656,9 @@ export function Chatbot() {
             key={message.id}
             className={cn(
               "flex gap-3 sm:gap-4 group",
-              message.role === "user" ? "ml-auto flex-row-reverse animate-slide-in-right max-w-[85%] sm:max-w-[80%]" : "animate-slide-in-left max-w-[92%] sm:max-w-[88%]"
+              message.role === "user"
+                ? "ml-auto flex-row-reverse animate-slide-in-right max-w-[85%] sm:max-w-[80%]"
+                : "animate-slide-in-left max-w-[92%] sm:max-w-[88%]",
             )}
             role="article"
           >
@@ -686,7 +667,7 @@ export function Chatbot() {
                 "w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center flex-shrink-0 font-bold text-xs sm:text-sm shadow-medium transition-smooth",
                 message.role === "user"
                   ? "gradient-bg text-primary-foreground shadow-primary/30 hover-lift"
-                  : "bg-gradient-to-br from-secondary to-accent/40 text-secondary-foreground"
+                  : "bg-gradient-to-br from-secondary to-accent/40 text-secondary-foreground",
               )}
               aria-hidden="true"
             >
@@ -699,8 +680,8 @@ export function Chatbot() {
                   message.role === "user"
                     ? "gradient-bg text-white shadow-strong shadow-primary/20"
                     : message.error
-                    ? "bg-destructive/10 border-destructive/50 shadow-medium hover:shadow-strong border-2"
-                    : "bg-card shadow-medium hover:shadow-strong border border-border/30"
+                      ? "bg-destructive/10 border-destructive/50 shadow-medium hover:shadow-strong border-2"
+                      : "bg-card shadow-medium hover:shadow-strong border border-border/30",
                 )}
               >
                 {message.error && (
@@ -709,28 +690,27 @@ export function Chatbot() {
                     <span>{language === "en" ? "Error" : "त्रुटि"}</span>
                   </div>
                 )}
-                
+
                 <div className={cn("markdown-content", message.role === "user" && "user-message-content")}>
                   {message.role === "user" ? (
                     <p className="whitespace-pre-wrap m-0">{message.content}</p>
                   ) : (
-                    <ReactMarkdown 
-                      remarkPlugins={[remarkGfm]}
-                      components={markdownComponents}
-                    >
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                       {preprocessMarkdown(message.content)}
                     </ReactMarkdown>
                   )}
                 </div>
-                
-                <div className={cn(
-                  "flex items-center justify-between mt-4 pt-3.5 border-t",
-                  message.role === "user" ? "border-white/15" : "border-border/30"
-                )}>
-                  <time 
+
+                <div
+                  className={cn(
+                    "flex items-center justify-between mt-4 pt-3.5 border-t",
+                    message.role === "user" ? "border-white/15" : "border-border/30",
+                  )}
+                >
+                  <time
                     className={cn(
                       "text-xs sm:text-sm font-medium",
-                      message.role === "user" ? "text-white/75" : "text-muted-foreground"
+                      message.role === "user" ? "text-white/75" : "text-muted-foreground",
                     )}
                     dateTime={message.timestamp.toISOString()}
                   >
@@ -738,7 +718,7 @@ export function Chatbot() {
                       ? message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
                       : new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </time>
-                  
+
                   <div className="flex items-center gap-1.5 transition-opacity" role="toolbar">
                     {message.error ? (
                       <Button
@@ -762,9 +742,9 @@ export function Chatbot() {
                           size="icon"
                           className={cn(
                             "h-8 w-8 sm:h-9 sm:w-9 transition-smooth rounded-xl touch-target",
-                            message.role === "user" 
-                              ? "text-white/75 hover:text-white hover:bg-white/15" 
-                              : "text-muted-foreground hover:text-foreground hover:bg-accent/70"
+                            message.role === "user"
+                              ? "text-white/75 hover:text-white hover:bg-white/15"
+                              : "text-muted-foreground hover:text-foreground hover:bg-accent/70",
                           )}
                           onClick={() => copyMessage(message.content, message.id)}
                           aria-label="Copy message"
@@ -775,7 +755,7 @@ export function Chatbot() {
                             <Copy className="w-4 h-4 sm:w-5 sm:h-5" />
                           )}
                         </Button>
-                        
+
                         {message.role === "assistant" && (
                           <>
                             <Button
@@ -788,7 +768,7 @@ export function Chatbot() {
                             >
                               <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
                             </Button>
-                            
+
                             {index === messages.length - 1 && (
                               <Button
                                 variant="ghost"
@@ -803,15 +783,15 @@ export function Chatbot() {
                             )}
                           </>
                         )}
-                        
+
                         <Button
                           variant="ghost"
                           size="icon"
                           className={cn(
                             "h-8 w-8 sm:h-9 sm:w-9 transition-smooth rounded-xl touch-target",
-                            message.role === "user" 
-                              ? "text-white/75 hover:text-white hover:bg-white/15" 
-                              : "text-muted-foreground hover:text-destructive hover:bg-destructive/15"
+                            message.role === "user"
+                              ? "text-white/75 hover:text-white hover:bg-white/15"
+                              : "text-muted-foreground hover:text-destructive hover:bg-destructive/15",
                           )}
                           onClick={() => deleteMessage(message.id)}
                           aria-label="Delete"
@@ -828,16 +808,29 @@ export function Chatbot() {
         ))}
 
         {isLoading && (
-          <div className="flex gap-3 sm:gap-4 max-w-[92%] sm:max-w-[88%] animate-slide-in-left" role="status" aria-live="polite">
+          <div
+            className="flex gap-3 sm:gap-4 max-w-[92%] sm:max-w-[88%] animate-slide-in-left"
+            role="status"
+            aria-live="polite"
+          >
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-secondary to-accent/40 text-secondary-foreground flex items-center justify-center flex-shrink-0 font-bold text-xs sm:text-sm shadow-medium">
               AI
             </div>
             <Card className="p-5 sm:p-6 rounded-3xl bg-card shadow-medium border border-border/30">
               <div className="flex items-center gap-4">
                 <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce shadow-sm" style={{ animationDelay: "0ms" }} />
-                  <div className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce shadow-sm" style={{ animationDelay: "150ms" }} />
-                  <div className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce shadow-sm" style={{ animationDelay: "300ms" }} />
+                  <div
+                    className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce shadow-sm"
+                    style={{ animationDelay: "0ms" }}
+                  />
+                  <div
+                    className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce shadow-sm"
+                    style={{ animationDelay: "150ms" }}
+                  />
+                  <div
+                    className="w-2.5 h-2.5 rounded-full bg-primary animate-bounce shadow-sm"
+                    style={{ animationDelay: "300ms" }}
+                  />
                 </div>
                 <span className="text-sm sm:text-base font-medium text-muted-foreground">
                   {language === "en" ? "Thinking..." : "सोच्दै..."}
@@ -851,7 +844,10 @@ export function Chatbot() {
       </main>
 
       {/* Enhanced Input */}
-  <footer className="sticky bottom-0 z-20 px-4 py-4 sm:px-6 sm:py-5 border-t border-border/40 bg-card/95 backdrop-blur-xl shadow-[0_-4px_16px_-4px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]" role="contentinfo">
+      <footer
+        className="fixed bottom-0 left-0 right-0 z-20 px-4 py-4 sm:px-6 sm:py-5 border-t border-border/40 bg-card/95 backdrop-blur-xl shadow-[0_-4px_16px_-4px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]"
+        role="contentinfo"
+      >
         <form onSubmit={handleSubmit} className="flex gap-2.5 sm:gap-3">
           <Button
             type="button"
@@ -861,7 +857,7 @@ export function Chatbot() {
             disabled={isLoading || !isOnline}
             className={cn(
               "flex-shrink-0 h-12 w-12 sm:h-12 sm:w-12 transition-smooth rounded-2xl touch-target",
-              isListening && "bg-destructive hover:bg-destructive/90 shadow-strong shadow-destructive/25 animate-pulse"
+              isListening && "bg-destructive hover:bg-destructive/90 shadow-strong shadow-destructive/25 animate-pulse",
             )}
             aria-label={isListening ? "Stop voice input" : "Start voice input"}
           >
@@ -896,14 +892,18 @@ export function Chatbot() {
         </form>
 
         {isListening && (
-          <div className="mt-4 flex items-center justify-center gap-3 text-sm sm:text-base font-semibold text-destructive animate-pulse" role="status" aria-live="polite">
+          <div
+            className="mt-4 flex items-center justify-center gap-3 text-sm sm:text-base font-semibold text-destructive animate-pulse"
+            role="status"
+            aria-live="polite"
+          >
             <div className="relative">
               <div className="w-2.5 h-2.5 rounded-full bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
               <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-destructive animate-ping" />
             </div>
             {language === "en" ? "Listening..." : "सुन्दै..."}
           </div>
-        )} 
+        )}
       </footer>
 
       {/* Dialogs */}
@@ -911,7 +911,7 @@ export function Chatbot() {
         <DialogHeader>
           <DialogTitle>{language === "en" ? "Clear Chat History?" : "कुराकानी इतिहास खाली गर्ने?"}</DialogTitle>
           <DialogDescription>
-            {language === "en" 
+            {language === "en"
               ? "This will permanently delete all messages from this conversation. This action cannot be undone."
               : "यसले यस कुराकानीबाट सबै सन्देशहरू स्थायी रूपमा मेटाउनेछ। यो कार्य पूर्ववत गर्न सकिँदैन।"}
           </DialogDescription>
@@ -958,11 +958,7 @@ export function Chatbot() {
           <div className="space-y-2">
             <label className="text-sm font-medium">{language === "en" ? "Auto-Speak" : "स्वत: बोल्नुहोस्"}</label>
             <div className="flex gap-2">
-              <Button
-                variant={autoSpeak ? "default" : "outline"}
-                className="flex-1"
-                onClick={() => setAutoSpeak(true)}
-              >
+              <Button variant={autoSpeak ? "default" : "outline"} className="flex-1" onClick={() => setAutoSpeak(true)}>
                 <Volume2 className="w-4 h-4 mr-2" />
                 {language === "en" ? "On" : "चालु"}
               </Button>
@@ -977,13 +973,37 @@ export function Chatbot() {
             </div>
           </div>
 
+          {messages.length > 0 && (
+            <div className="space-y-2 border-t border-border/30 pt-4">
+              <label className="text-sm font-medium">
+                {language === "en" ? "Chat Management" : "कुराकानी व्यवस्थापन"}
+              </label>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 bg-transparent hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => {
+                    setShowClearDialog(true)
+                    setShowSettingsDialog(false)
+                  }}
+                >
+                  <Trash className="w-4 h-4 mr-2" />
+                  {language === "en" ? "Clear" : "खाली गर्नुहोस्"}
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
-            <label className="text-sm font-medium">{language === "en" ? "Export" : "निर्यात"}</label>
+            <label className="text-sm font-medium">{language === "en" ? "Export Format" : "निर्यात ढाँचा"}</label>
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                className="flex-1"
-                onClick={() => { exportChat('txt'); setShowSettingsDialog(false) }}
+                className="flex-1 bg-transparent"
+                onClick={() => {
+                  exportChat("txt")
+                  setShowSettingsDialog(false)
+                }}
                 disabled={messages.length === 0}
               >
                 <Download className="w-4 h-4 mr-2" />
@@ -991,8 +1011,11 @@ export function Chatbot() {
               </Button>
               <Button
                 variant="outline"
-                className="flex-1"
-                onClick={() => { exportChat('json'); setShowSettingsDialog(false) }}
+                className="flex-1 bg-transparent"
+                onClick={() => {
+                  exportChat("json")
+                  setShowSettingsDialog(false)
+                }}
                 disabled={messages.length === 0}
               >
                 <Download className="w-4 h-4 mr-2" />
