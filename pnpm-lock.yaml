@@ -54,7 +54,7 @@ importers:
         specifier: latest
         version: 0.4.6(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       openai:
-        specifier: latest
+        specifier: 6.5.0
         version: 6.5.0(ws@8.18.3)(zod@4.1.12)
       react:
         specifier: ^19
