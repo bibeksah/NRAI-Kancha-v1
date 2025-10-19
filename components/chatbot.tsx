@@ -734,7 +734,7 @@ export function Chatbot() {
                       : new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </time>
                   
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" role="toolbar">
+                  <div className="flex items-center gap-1 transition-opacity" role="toolbar">
                     {message.error ? (
                       <Button
                         variant="ghost"
