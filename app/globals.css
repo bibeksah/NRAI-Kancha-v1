@@ -80,6 +80,11 @@
   }
 }
 
+/* Mobile viewport fix: ensure full-height on mobile with dynamic viewport units */
+html, body {
+  min-height: 100dvh;
+}
+
 /* Custom animations */
 @keyframes slideIn {
   from {

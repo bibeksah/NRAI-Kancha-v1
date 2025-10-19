@@ -519,7 +519,7 @@ export function Chatbot() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-background via-background to-accent/10 relative overflow-hidden">
+    <div className="flex flex-col min-h-[100dvh] w-full bg-gradient-to-br from-background via-background to-accent/10 relative overflow-hidden">
       {/* Decorative background elements */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
@@ -535,7 +535,7 @@ export function Chatbot() {
 
       {/* Enhanced Header */}
       <header 
-        className="relative z-10 border-b border-border/40 bg-card/95 backdrop-blur-xl shadow-soft"
+        className="sticky top-0 z-20 border-b border-border/40 bg-card/95 backdrop-blur-xl shadow-soft"
         role="banner"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] via-accent/[0.03] to-primary/[0.03]" />
@@ -629,7 +629,7 @@ export function Chatbot() {
       {/* Messages */}
       <main 
         ref={messagesContainerRef}
-        className="relative z-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 space-y-4 sm:space-y-5 scroll-smooth"
+        className="relative z-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 space-y-4 sm:space-y-5 pb-28 sm:pb-32 scroll-smooth"
         role="main"
         aria-label="Chat messages"
       >
@@ -851,7 +851,7 @@ export function Chatbot() {
       </main>
 
       {/* Enhanced Input */}
-  <footer className="relative z-10 px-4 py-4 sm:px-6 sm:py-5 border-t border-border/40 bg-card/95 backdrop-blur-xl shadow-[0_-4px_16px_-4px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]" role="contentinfo">
+  <footer className="sticky bottom-0 z-20 px-4 py-4 sm:px-6 sm:py-5 border-t border-border/40 bg-card/95 backdrop-blur-xl shadow-[0_-4px_16px_-4px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]" role="contentinfo">
         <form onSubmit={handleSubmit} className="flex gap-2.5 sm:gap-3">
           <Button
             type="button"
