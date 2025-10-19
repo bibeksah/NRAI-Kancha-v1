@@ -46,7 +46,7 @@ The redesign implements an elegant, professional light green color palette:
 
 ## 📁 File Structure
 
-```
+\`\`\`
 NRAI-Kancha-v1/
 ├── app/
 │   ├── globals.css              # Updated with light green theme
@@ -57,14 +57,14 @@ NRAI-Kancha-v1/
 │   └── ui/
 │       └── ...
 └── package.json                 # Updated with framer-motion
-```
+\`\`\`
 
 ## 🚀 Implementation Steps
 
 ### 1. Install Dependencies
-```bash
+\`\`\`bash
 npm install framer-motion
-```
+\`\`\`
 
 ### 2. Update Global Styles
 The `app/globals.css` file has been completely redesigned with:
@@ -77,7 +77,7 @@ The `app/globals.css` file has been completely redesigned with:
 ### 3. New Component Features
 
 #### Message Blocks (Not Bubbles)
-```css
+\`\`\`css
 .message-block-user {
   @apply border-l-4 border-primary/40 pl-5 pr-4 py-4 bg-primary/5;
 }
@@ -85,7 +85,7 @@ The `app/globals.css` file has been completely redesigned with:
 .message-block-assistant {
   @apply border-l-4 border-muted-foreground/20 pl-5 pr-4 py-4;
 }
-```
+\`\`\`
 
 #### Framer Motion Animations
 - **Header**: Slides down with spring animation
@@ -112,7 +112,7 @@ The `app/globals.css` file has been completely redesigned with:
 ## 🎭 Animation Variants
 
 ### Message Animations
-```typescript
+\`\`\`typescript
 const messageVariants = {
   hidden: { opacity: 0, y: 20, scale: 0.98 },
   visible: {
@@ -126,10 +126,10 @@ const messageVariants = {
     }
   }
 }
-```
+\`\`\`
 
 ### Container Stagger
-```typescript
+\`\`\`typescript
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -139,7 +139,7 @@ const containerVariants = {
     }
   }
 }
-```
+\`\`\`
 
 ## 📱 Responsive Breakpoints
 
@@ -208,23 +208,23 @@ const containerVariants = {
 
 ### Changing Theme Colors
 Update the CSS variables in `app/globals.css`:
-```css
+\`\`\`css
 :root {
   --primary: oklch(0.65 0.15 150);  /* Change hue for different color */
   --gradient-from: oklch(0.65 0.15 150);
   --gradient-to: oklch(0.72 0.13 165);
 }
-```
+\`\`\`
 
 ### Adjusting Animation Speed
 Modify transition durations:
-```typescript
+\`\`\`typescript
 transition: {
   type: "spring",
   stiffness: 300,  // Higher = faster
   damping: 30      // Higher = less bounce
 }
-```
+\`\`\`
 
 ## 📊 Performance Optimizations
 
@@ -259,19 +259,19 @@ transition: {
 ### Replace Original Component
 To use the new design, replace the import in your page:
 
-```typescript
+\`\`\`typescript
 // Before
 import { Chatbot } from "@/components/chatbot"
 
 // After
 import { Chatbot } from "@/components/chatbot-redesigned"
-```
+\`\`\`
 
 Or rename the files:
-```bash
+\`\`\`bash
 mv components/chatbot.tsx components/chatbot-old.tsx
 mv components/chatbot-redesigned.tsx components/chatbot.tsx
-```
+\`\`\`
 
 ## 🎓 Best Practices
 
@@ -302,10 +302,10 @@ mv components/chatbot-redesigned.tsx components/chatbot.tsx
 ## 🚦 Deployment
 
 ### Build for Production
-```bash
+\`\`\`bash
 npm run build
 npm start
-```
+\`\`\`
 
 ### Environment Variables
 Ensure these are set:

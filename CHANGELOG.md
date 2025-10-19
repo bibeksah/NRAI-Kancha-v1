@@ -40,7 +40,7 @@ All notable changes to the NRAI Kancha chatbot interface.
   - Layout animations for smooth transitions
 
 #### Animation Variants
-```typescript
+\`\`\`typescript
 messageVariants: {
   - hidden: { opacity: 0, y: 20, scale: 0.98 }
   - visible: { opacity: 1, y: 0, scale: 1 }
@@ -52,7 +52,7 @@ headerVariants: {
   - visible: { opacity: 1, y: 0 }
   - Spring: stiffness 260, damping 20
 }
-```
+\`\`\`
 
 ### 📱 Responsive Design - ENHANCED
 
@@ -135,11 +135,11 @@ headerVariants: {
 ### 📦 Dependencies - UPDATED
 
 #### Added
-```json
+\`\`\`json
 {
   "framer-motion": "^11.15.0"
 }
-```
+\`\`\`
 
 ### 📝 Documentation - COMPREHENSIVE
 
@@ -225,13 +225,13 @@ headerVariants: {
 ### ⚠️ Breaking Changes
 
 1. **Import Path** (if renaming)
-   ```typescript
+   \`\`\`typescript
    // Before
    import { Chatbot } from "@/components/chatbot"
    
    // After
    import { Chatbot } from "@/components/chatbot-redesigned"
-   ```
+   \`\`\`
 
 2. **CSS Classes**
    - `.message-bubble` → `.message-block`
@@ -249,14 +249,14 @@ headerVariants: {
 ### 🔄 Migration Guide
 
 #### Step 1: Install Dependencies
-```bash
+\`\`\`bash
 npm install
-```
+\`\`\`
 
 #### Step 2: Activate Design
-```bash
+\`\`\`bash
 .\activate-redesign.ps1
-```
+\`\`\`
 
 #### Step 3: Test
 - Run dev server
@@ -265,10 +265,10 @@ npm install
 - Verify animations
 
 #### Step 4: Deploy
-```bash
+\`\`\`bash
 npm run build
 npm start
-```
+\`\`\`
 
 ### 📊 Comparison Summary
 

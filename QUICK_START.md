@@ -3,17 +3,17 @@
 ## One-Command Activation
 
 ### Step 1: Install Framer Motion (if not already installed)
-```bash
+\`\`\`bash
 cd C:\Users\bibek\Desktop\NRAI-Kancha-v1
 npm install
-```
+\`\`\`
 
 ### Step 2: Activate the New Design
 
 Choose one of these options:
 
 #### **Option A: Replace Original (Recommended)**
-```bash
+\`\`\`bash
 # Backup original
 move components\chatbot.tsx components\chatbot-old-backup.tsx
 
@@ -22,22 +22,22 @@ move components\chatbot-redesigned.tsx components\chatbot.tsx
 
 # Done! Restart dev server
 npm run dev
-```
+\`\`\`
 
 #### **Option B: Update Import Only**
 Edit `app/page.tsx`:
-```typescript
+\`\`\`typescript
 // Change line 3 from:
 import { Chatbot } from "@/components/chatbot"
 
 // To:
 import { Chatbot } from "@/components/chatbot-redesigned"
-```
+\`\`\`
 
 Then restart:
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 
 ## ✅ Verification
 
@@ -51,13 +51,13 @@ After activation, you should see:
 
 If you want to go back to the original:
 
-```bash
+\`\`\`bash
 # If you used Option A:
 move components\chatbot-old-backup.tsx components\chatbot.tsx
 
 # If you used Option B:
 # Just change the import back in app/page.tsx
-```
+\`\`\`
 
 ## 🎨 What Changed
 
@@ -91,16 +91,16 @@ After activation, test these features:
 ## 🐛 Troubleshooting
 
 ### Animations not working?
-```bash
+\`\`\`bash
 npm install framer-motion
 npm run dev
-```
+\`\`\`
 
 ### Build errors?
-```bash
+\`\`\`bash
 npm install
 npm run build
-```
+\`\`\`
 
 ### Styles look wrong?
 - Clear browser cache (Ctrl + Shift + Delete)

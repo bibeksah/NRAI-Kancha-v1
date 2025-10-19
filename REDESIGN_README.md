@@ -82,44 +82,44 @@ Messages now display as **properly formatted text blocks** with:
 ### Installation
 
 1. **Install Dependencies**
-   ```bash
+   \`\`\`bash
    cd C:\Users\bibek\Desktop\NRAI-Kancha-v1
    npm install
-   ```
+   \`\`\`
 
 2. **Activate New Design** (Choose one)
 
    **Option A: PowerShell Script (Recommended)**
-   ```powershell
+   \`\`\`powershell
    .\activate-redesign.ps1
-   ```
+   \`\`\`
 
    **Option B: Manual Activation**
-   ```bash
+   \`\`\`bash
    # Backup original
    move components\chatbot.tsx components\chatbot-old-backup.tsx
    
    # Activate new design
    move components\chatbot-redesigned.tsx components\chatbot.tsx
-   ```
+   \`\`\`
 
    **Option C: Keep Both**
-   ```typescript
+   \`\`\`typescript
    // In app/page.tsx, change:
    import { Chatbot } from "@/components/chatbot"
    // To:
    import { Chatbot } from "@/components/chatbot-redesigned"
-   ```
+   \`\`\`
 
 3. **Start Development Server**
-   ```bash
+   \`\`\`bash
    npm run dev
-   ```
+   \`\`\`
 
 4. **Open Browser**
-   ```
+   \`\`\`
    http://localhost:3000
-   ```
+   \`\`\`
 
 ## 📚 Documentation
 
@@ -144,7 +144,7 @@ Complete documentation is available in these files:
 ### Message Display Transformation
 
 **Before (Bubbles):**
-```
+\`\`\`
 ┌─────────────────────┐
 │  ╭───────────────╮  │
 │  │ User message  │  │
@@ -153,10 +153,10 @@ Complete documentation is available in these files:
 │  │ AI response   │  │
 │  ╰───────────────╯  │
 └─────────────────────┘
-```
+\`\`\`
 
 **After (Text Blocks):**
-```
+\`\`\`
 ┌─────────────────────┐
 │ ┃ USER MESSAGE      │
 │ ┃ Clean text block  │
@@ -168,17 +168,17 @@ Complete documentation is available in these files:
 │ ┃ ## Heading        │
 │ ┃ - List item       │
 └─────────────────────┘
-```
+\`\`\`
 
 ### Color Palette
 
-```css
+\`\`\`css
 /* Light Green Theme */
 --primary: oklch(0.65 0.15 150);      /* Elegant green */
 --secondary: oklch(0.96 0.015 150);   /* Soft gray-green */
 --background: oklch(0.99 0.002 140);  /* Green-tinted white */
 --accent: oklch(0.93 0.03 160);       /* Light accent */
-```
+\`\`\`
 
 ## 🔧 Technical Details
 
@@ -191,14 +191,14 @@ Complete documentation is available in these files:
 - **Speech**: Azure Cognitive Services
 
 ### New Dependencies
-```json
+\`\`\`json
 {
   "framer-motion": "^11.15.0"
 }
-```
+\`\`\`
 
 ### Component Structure
-```
+\`\`\`
 components/
 ├── chatbot.tsx              # Original (backup)
 ├── chatbot-redesigned.tsx   # New design ✨
@@ -206,7 +206,7 @@ components/
     ├── button.tsx
     ├── textarea.tsx
     └── ...
-```
+\`\`\`
 
 ### Animation System
 - **Spring Physics**: Natural, bouncy feel
@@ -223,9 +223,9 @@ components/
 ## 🎯 Activation
 
 ### Method 1: Automated (PowerShell)
-```powershell
+\`\`\`powershell
 .\activate-redesign.ps1
-```
+\`\`\`
 Follow the prompts to:
 1. Create backup of original
 2. Activate new design
@@ -262,10 +262,10 @@ After activation, verify:
 
 ### Issue: Animations not working
 **Solution:**
-```bash
+\`\`\`bash
 npm install framer-motion
 npm run dev
-```
+\`\`\`
 
 ### Issue: Styles look wrong
 **Solution:**
@@ -275,17 +275,17 @@ npm run dev
 
 ### Issue: Build fails
 **Solution:**
-```bash
+\`\`\`bash
 rm -rf node_modules .next
 npm install
 npm run build
-```
+\`\`\`
 
 ### Issue: TypeScript errors
 **Solution:**
-```bash
+\`\`\`bash
 npm install @types/react @types/react-dom
-```
+\`\`\`
 
 ## 📱 Browser Support
 
@@ -314,13 +314,13 @@ When working with the new design:
 
 If you need to revert to the original:
 
-```bash
+\`\`\`bash
 # If you used automated activation:
 move components\chatbot-old-backup.tsx components\chatbot.tsx
 
 # If you changed imports:
 # Just change the import back in app/page.tsx
-```
+\`\`\`
 
 ## 📊 Performance
 
