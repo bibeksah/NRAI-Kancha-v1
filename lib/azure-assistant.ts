@@ -74,7 +74,13 @@ export class AzureAssistantService {
       // Poll until the run completes
       while (run.status === "queued" || run.status === "in_progress") {
         await new Promise((resolve) => setTimeout(resolve, 1000))
-        
+        // Extra debug logging to validate parameters used in retrieve
+        console.log("[Assistant] Polling run status with:", {
+          threadId,
+          runId: run?.id,
+        })
+
+        // Retrieve latest run status
         run = await this.client.beta.threads.runs.retrieve(threadId, run.id)
         console.log("[Assistant] Run status:", run.status)
       }
@@ -125,6 +131,11 @@ export class AzureAssistantService {
       return formattedMessages
     } catch (error) {
       console.error("[Assistant] Error in sendMessage:", error)
+      // Provide additional context when possible
+      if (error && typeof error === "object" && "message" in (error as Record<string, unknown>)) {
+        const msg = (error as { message?: unknown }).message
+        console.error("[Assistant] Error details:", typeof msg === "string" ? msg : String(msg))
+      }
       throw new Error(`Failed to send message: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
