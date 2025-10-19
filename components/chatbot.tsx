@@ -68,7 +68,7 @@ export function Chatbot() {
   const [isListening, setIsListening] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [language, setLanguage] = useState<Language>("en")
-  const [autoSpeak, setAutoSpeak] = useState(true)
+  const [autoSpeak, setAutoSpeak] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [showClearDialog, setShowClearDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
@@ -868,7 +868,7 @@ export function Chatbot() {
             value={input}
             onChange={handleTextareaChange}
             onKeyDown={handleKeyDown}
-            placeholder={language === "en" ? "Type your message... (Shift+Enter for new line)" : "आफ्नो सन्देश टाइप गर्नुहोस्..."}
+            placeholder={language === "en" ? "Type your message..." : "आफ्नो सन्देश टाइप गर्नुहोस्..."}
             disabled={isLoading || isListening || !isOnline}
             className="flex-1 min-h-[40px] max-h-[150px] resize-none bg-background text-foreground placeholder:text-muted-foreground border-border/50 focus:border-primary/50 transition-all text-sm sm:text-base py-2 sm:py-2.5"
             rows={1}
