@@ -63,27 +63,12 @@ export class AzureAssistantService {
 
       console.log("[Assistant] Creating run with assistant:", this.assistantId)
       
-      // Create and run the assistant
-      let run = await this.client.beta.threads.runs.create(threadId, {
+      // Create and poll the run until completion using SDK helper
+      const run = await this.client.beta.threads.runs.createAndPoll(threadId, {
         assistant_id: this.assistantId,
       })
 
-      console.log("[Assistant] Run created:", run.id)
-      console.log("[Assistant] Initial status:", run.status)
-
-      // Poll until the run completes
-      while (run.status === "queued" || run.status === "in_progress") {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        // Extra debug logging to validate parameters used in retrieve
-        console.log("[Assistant] Polling run status with:", {
-          threadId,
-          runId: run?.id,
-        })
-
-        // Retrieve latest run status
-        run = await this.client.beta.threads.runs.retrieve(threadId, run.id)
-        console.log("[Assistant] Run status:", run.status)
-      }
+      console.log("[Assistant] Run finished with status:", run.status)
 
       if (run.status === "failed") {
         const errorMessage = run.last_error?.message || "Unknown error"
