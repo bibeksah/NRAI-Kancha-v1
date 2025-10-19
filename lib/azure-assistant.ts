@@ -10,7 +10,6 @@ export interface Message {
 export class AzureAssistantService {
   private client: AzureOpenAI
   private assistantId: string
-  private threadId: string | null = null
 
   constructor(endpoint: string, apiKey: string, assistantId: string) {
     console.log("[Assistant] Initializing Azure OpenAI Assistant Service")
@@ -32,7 +31,7 @@ export class AzureAssistantService {
     console.log("[Assistant] Service initialized successfully")
   }
 
-  async initialize(): Promise<string> {
+  async createThread(): Promise<string> {
     try {
       console.log("[Assistant] Creating new thread")
 
@@ -43,28 +42,21 @@ export class AzureAssistantService {
         throw new Error("Failed to create thread: Invalid response")
       }
 
-      this.threadId = thread.id
-      console.log("[Assistant] Thread created:", this.threadId)
+      console.log("[Assistant] Thread created:", thread.id)
       
-      return this.threadId
+      return thread.id
     } catch (error) {
       console.error("[Assistant] Error creating thread:", error)
       throw new Error(`Failed to create thread: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
-  async sendMessage(content: string): Promise<Message[]> {
+  async sendMessage(threadId: string, content: string): Promise<Message[]> {
     try {
-      // Create thread if it doesn't exist
-      if (!this.threadId) {
-        console.log("[Assistant] No thread exists, creating one")
-        await this.initialize()
-      }
-
-      console.log("[Assistant] Adding user message to thread:", this.threadId)
+      console.log("[Assistant] Adding user message to thread:", threadId)
       
       // Add user message to thread
-      await this.client.beta.threads.messages.create(this.threadId!, {
+      await this.client.beta.threads.messages.create(threadId, {
         role: "user",
         content: content,
       })
@@ -72,7 +64,7 @@ export class AzureAssistantService {
       console.log("[Assistant] Creating run with assistant:", this.assistantId)
       
       // Create and run the assistant
-      let run = await this.client.beta.threads.runs.create(this.threadId!, {
+      let run = await this.client.beta.threads.runs.create(threadId, {
         assistant_id: this.assistantId,
       })
 
@@ -83,7 +75,7 @@ export class AzureAssistantService {
       while (run.status === "queued" || run.status === "in_progress") {
         await new Promise((resolve) => setTimeout(resolve, 1000))
         
-        run = await this.client.beta.threads.runs.retrieve(this.threadId!, run.id)
+        run = await this.client.beta.threads.runs.retrieve(threadId, run.id)
         console.log("[Assistant] Run status:", run.status)
       }
 
@@ -104,7 +96,7 @@ export class AzureAssistantService {
       console.log("[Assistant] Run completed successfully, retrieving messages")
 
       // Get all messages from the thread
-      const messages = await this.client.beta.threads.messages.list(this.threadId!)
+      const messages = await this.client.beta.threads.messages.list(threadId)
 
       // Convert to our Message format
       const formattedMessages: Message[] = []
@@ -169,13 +161,9 @@ export class AzureAssistantService {
     return cleaned
   }
 
-  async getThreadMessages(): Promise<Message[]> {
-    if (!this.threadId) {
-      return []
-    }
-
+  async getThreadMessages(threadId: string): Promise<Message[]> {
     try {
-      const messages = await this.client.beta.threads.messages.list(this.threadId)
+      const messages = await this.client.beta.threads.messages.list(threadId)
 
       const formattedMessages: Message[] = []
       
