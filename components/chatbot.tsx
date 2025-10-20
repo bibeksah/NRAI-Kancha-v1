@@ -25,7 +25,8 @@ import {
   WifiOff,
   Bot,
   User,
-  X
+  X,
+  Square
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { SpeechService, type Language } from "@/lib/speech-service"
@@ -111,6 +112,7 @@ export function Chatbot() {
   const [isLoading, setIsLoading] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null)
   const [language, setLanguage] = useState<Language>("en")
   const [autoSpeak, setAutoSpeak] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
@@ -240,7 +242,7 @@ export function Chatbot() {
         if (autoSpeak) {
           const lastMessage = data.messages[data.messages.length - 1]
           if (lastMessage.role === "assistant") {
-            await speakText(lastMessage.content)
+            await speakText(lastMessage.content, lastMessage.id)
           }
         }
       }
@@ -306,17 +308,38 @@ export function Chatbot() {
     setIsListening(false)
   }
 
-  const speakText = async (text: string) => {
+  const speakText = async (text: string, messageId: string) => {
     if (!speechServiceRef.current || isSpeaking) return
 
     setIsSpeaking(true)
+    setSpeakingMessageId(messageId)
+    
+    // Poll to keep button state synced with actual speech state
+    const pollInterval = setInterval(() => {
+      if (speechServiceRef.current && !speechServiceRef.current.isSpeaking()) {
+        clearInterval(pollInterval)
+        setIsSpeaking(false)
+        setSpeakingMessageId(null)
+      }
+    }, 100)
+
     try {
       await speechServiceRef.current.synthesizeSpeech(text, language)
     } catch (error) {
       console.error("Speech synthesis error:", error)
     } finally {
+      clearInterval(pollInterval)
       setIsSpeaking(false)
+      setSpeakingMessageId(null)
     }
+  }
+
+  const stopSpeaking = () => {
+    if (speechServiceRef.current) {
+      speechServiceRef.current.stopSynthesis()
+    }
+    setIsSpeaking(false)
+    setSpeakingMessageId(null)
   }
 
   const copyMessage = async (content: string, id: string) => {
@@ -802,10 +825,20 @@ export function Chatbot() {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 rounded-lg hover:bg-accent"
-                          onClick={() => speakText(message.content)}
-                          disabled={isSpeaking}
+                          onClick={() => {
+                            if (speakingMessageId === message.id) {
+                              stopSpeaking()
+                            } else {
+                              speakText(message.content, message.id)
+                            }
+                          }}
+                          disabled={isSpeaking && speakingMessageId !== message.id}
                         >
-                          <Volume2 className="w-3.5 h-3.5" />
+                          {speakingMessageId === message.id ? (
+                            <Square className="w-3.5 h-3.5 fill-current" />
+                          ) : (
+                            <Volume2 className="w-3.5 h-3.5" />
+                          )}
                         </Button>
                       </motion.div>
 
