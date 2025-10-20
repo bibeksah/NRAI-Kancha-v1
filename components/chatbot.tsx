@@ -1,5 +1,6 @@
 "use client"
 
+import type React from "react"
 import { useState, useRef, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
@@ -30,7 +31,7 @@ import { cn } from "@/lib/utils"
 import { SpeechService, type Language } from "@/lib/speech-service"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import React from "react"
+import type { Components } from "react-markdown"
 
 interface Message {
   id: string
@@ -139,14 +140,8 @@ export function Chatbot() {
       const savedMessages = localStorage.getItem("nrai-kancha-messages")
       if (savedMessages) {
         try {
-          const parsed = JSON.parse(savedMessages) as Array<{
-            id: string
-            role: "user" | "assistant"
-            content: string
-            timestamp: string | number | Date
-            error?: boolean
-          }>
-          const messagesWithDates: Message[] = parsed.map((msg) => ({
+          const parsed = JSON.parse(savedMessages)
+          const messagesWithDates = parsed.map((msg: any) => ({
             ...msg,
             timestamp: new Date(msg.timestamp)
           }))
@@ -235,12 +230,7 @@ export function Chatbot() {
       const data = await response.json()
 
       if (data.messages) {
-        const messagesWithDates: Message[] = (data.messages as Array<{
-          id: string
-          role: "user" | "assistant"
-          content: string
-          timestamp: string | number | Date
-        }>).map((msg) => ({
+        const messagesWithDates = data.messages.map((msg: any) => ({
           ...msg,
           timestamp: new Date(msg.timestamp),
           error: false
@@ -254,8 +244,7 @@ export function Chatbot() {
           }
         }
       }
-    } catch (_error) {
-      console.error("Failed to send message", _error)
+    } catch (error) {
       const errorMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
@@ -383,33 +372,31 @@ export function Chatbot() {
   }
 
   // Markdown components for proper formatting
-  const markdownComponents = {
-    h1: (props: Record<string, unknown>) => <h1 className="text-2xl font-bold mt-6 mb-4 first:mt-0 text-foreground" {...(props as object)} />,
-    h2: (props: Record<string, unknown>) => <h2 className="text-xl font-bold mt-5 mb-3 first:mt-0 text-foreground/95" {...(props as object)} />,
-    h3: (props: Record<string, unknown>) => <h3 className="text-lg font-semibold mt-4 mb-2 first:mt-0 text-foreground/90" {...(props as object)} />,
-    h4: (props: Record<string, unknown>) => <h4 className="text-base font-semibold mt-3 mb-2 first:mt-0 text-foreground/85" {...(props as object)} />,
-    p: (props: Record<string, unknown>) => <p className="my-3 first:mt-0 last:mb-0 leading-7 text-foreground/90" {...(props as object)} />,
-    ul: (props: Record<string, unknown>) => <ul className="list-disc list-outside ml-6 my-3 space-y-2 text-foreground/90" {...(props as object)} />,
-    ol: (props: Record<string, unknown>) => <ol className="list-decimal list-outside ml-6 my-3 space-y-2 text-foreground/90" {...(props as object)} />,
-    li: (props: Record<string, unknown>) => <li className="pl-1 leading-7 text-foreground/90" {...(props as object)} />,
-    a: (props: Record<string, unknown>) => <a className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors font-medium" target="_blank" rel="noopener noreferrer" {...(props as object)} />,
-    code: (props: Record<string, unknown>) => 
-      (props as { inline?: boolean }).inline ? 
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono border border-border/30 text-foreground" {...(props as object)} /> : 
-        <code className="block bg-muted p-4 rounded-lg overflow-x-auto my-3 text-sm border border-border/30 font-mono text-foreground" {...(props as object)} />,
-    pre: (props: Record<string, unknown>) => <pre className="bg-muted p-4 rounded-lg overflow-x-auto my-3 border border-border/30" {...(props as object)} />,
-    blockquote: (props: Record<string, unknown>) => <blockquote className="border-l-4 border-primary/40 pl-4 italic my-3 text-muted-foreground bg-muted/30 py-2 rounded-r" {...(props as object)} />,
-    hr: (props: Record<string, unknown>) => <hr className="border-t-2 border-border/50 my-6" {...(props as object)} />,
-    table: (props: Record<string, unknown>) => <table className="w-full border-collapse my-4 border border-border rounded-lg overflow-hidden" {...(props as object)} />,
-    thead: (props: Record<string, unknown>) => <thead className="bg-muted/50" {...(props as object)} />,
-    th: (props: Record<string, unknown>) => <th className="px-4 py-2 text-left font-semibold border-b border-border text-foreground" {...(props as object)} />,
-    td: (props: Record<string, unknown>) => <td className="px-4 py-2 border-t border-border text-foreground/90" {...(props as object)} />,
-    tbody: (props: Record<string, unknown>) => <tbody {...(props as object)} />,
-    tr: (props: Record<string, unknown>) => <tr className="hover:bg-muted/30 transition-colors" {...(props as object)} />,
-    // eslint-disable-next-line @next/next/no-img-element
-    img: (props: Record<string, unknown>) => <img className="max-w-full h-auto rounded-lg my-3 border border-border/30" {...(props as object)} />,
-    strong: (props: Record<string, unknown>) => <strong className="font-bold text-foreground" {...(props as object)} />,
-    em: (props: Record<string, unknown>) => <em className="italic text-foreground/90" {...(props as object)} />,
+  const markdownComponents: Components = {
+    h1: (props) => <h1 className="text-2xl font-bold mt-6 mb-4 first:mt-0 text-foreground" {...props} />,
+    h2: (props) => <h2 className="text-xl font-bold mt-5 mb-3 first:mt-0 text-foreground/95" {...props} />,
+    h3: (props) => <h3 className="text-lg font-semibold mt-4 mb-2 first:mt-0 text-foreground/90" {...props} />,
+    h4: (props) => <h4 className="text-base font-semibold mt-3 mb-2 first:mt-0 text-foreground/85" {...props} />,
+    p: (props) => <p className="my-3 first:mt-0 last:mb-0 leading-7 text-foreground/90" {...props} />,
+    ul: (props) => <ul className="list-disc list-outside ml-6 my-3 space-y-2" {...props} />,
+    ol: (props) => <ol className="list-decimal list-outside ml-6 my-3 space-y-2" {...props} />,
+    li: (props) => <li className="pl-1 leading-7" {...props} />,
+    a: (props) => <a className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors font-medium" {...props} />,
+    code: ({inline, ...props}) => 
+      inline ? 
+        <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono border border-border/30" {...props} /> : 
+        <code className="block bg-muted p-4 rounded-lg overflow-x-auto my-3 text-sm border border-border/30" {...props} />,
+    pre: (props) => <pre className="bg-muted p-4 rounded-lg overflow-x-auto my-3 border border-border/30" {...props} />,
+    blockquote: (props) => <blockquote className="border-l-4 border-primary/40 pl-4 italic my-3 text-muted-foreground bg-muted/30 py-2 rounded-r" {...props} />,
+    hr: (props) => <hr className="border-t-2 border-border/50 my-6" {...props} />,
+    table: (props) => <table className="w-full border-collapse my-4 border border-border rounded-lg overflow-hidden" {...props} />,
+    thead: (props) => <thead className="bg-muted/50" {...props} />,
+    th: (props) => <th className="px-4 py-2 text-left font-semibold border-b border-border" {...props} />,
+    td: (props) => <td className="px-4 py-2 border-t border-border" {...props} />,
+    tbody: (props) => <tbody {...props} />,
+    tr: (props) => <tr className="hover:bg-muted/30 transition-colors" {...props} />,
+    img: (props) => <img className="max-w-full h-auto rounded-lg my-3 border border-border/30" {...props} />,
+    strong: (props) => <strong className="font-bold text-foreground" {...props} />,
   }
 
   return (
@@ -642,7 +629,7 @@ export function Chatbot() {
         )}
       </AnimatePresence>
 
-      {/* Messages - Clean like Claude/ChatGPT */}
+      {/* Messages */}
       <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 max-w-4xl mx-auto w-full pb-32">
         {messages.length === 0 && (
           <motion.div
@@ -711,117 +698,141 @@ export function Chatbot() {
               exit="exit"
               layout
               className={cn(
-                "group py-6 sm:py-8",
-                index !== 0 && "border-t border-border/30"
+                "group py-6",
+                message.role === "user" ? "flex justify-end" : ""
               )}
             >
-              <div className="flex items-start gap-4">
-                {/* Avatar */}
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-                    message.role === "user"
-                      ? "gradient-bg text-white shadow-soft"
-                      : "bg-muted text-muted-foreground"
-                  )}
-                >
-                  {message.role === "user" ? (
-                    <User className="w-4 h-4" />
-                  ) : (
-                    <Bot className="w-4 h-4" />
-                  )}
-                </motion.div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0 space-y-2">
-                  {/* Role Label */}
-                  <div className="text-sm font-semibold text-foreground">
-                    {message.role === "user" 
-                      ? (language === "en" ? "You" : "तपाईं")
-                      : "AI"}
+              {message.role === "user" ? (
+                /* USER MESSAGE - WITH BUBBLE */
+                <div className="flex items-start gap-3 max-w-[85%] sm:max-w-[75%]">
+                  <div className="flex-1 min-w-0">
+                    <motion.div
+                      initial={{ scale: 0.95 }}
+                      animate={{ scale: 1 }}
+                      className="gradient-bg text-white rounded-3xl px-5 py-4 shadow-medium"
+                    >
+                      <p className="whitespace-pre-wrap leading-7 text-white">{message.content}</p>
+                      
+                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/20">
+                        <span className="text-xs text-white/75">
+                          {message.timestamp.toLocaleTimeString([], { 
+                            hour: "2-digit", 
+                            minute: "2-digit" 
+                          })}
+                        </span>
+                        
+                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 rounded-lg hover:bg-white/20 text-white"
+                            onClick={() => copyMessage(message.content, message.id)}
+                          >
+                            {copiedId === message.id ? (
+                              <Check className="w-3.5 h-3.5" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </Button>
+                        </motion.div>
+                      </div>
+                    </motion.div>
                   </div>
+                  
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="w-8 h-8 rounded-full gradient-bg text-white shadow-soft flex items-center justify-center flex-shrink-0"
+                  >
+                    <User className="w-4 h-4" />
+                  </motion.div>
+                </div>
+              ) : (
+                /* AI MESSAGE - NO BUBBLE (CLEAN) */
+                <div className="flex items-start gap-4">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center flex-shrink-0"
+                  >
+                    <Bot className="w-4 h-4" />
+                  </motion.div>
 
-                  {/* Error Badge */}
-                  {message.error && (
-                    <div className="flex items-center gap-2 mb-2 text-destructive text-sm font-medium">
-                      <AlertCircle className="w-4 h-4" />
-                      <span>{language === "en" ? "Error" : "त्रुटि"}</span>
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="text-sm font-semibold text-foreground">
+                      AI
                     </div>
-                  )}
 
-                  {/* Message Content - No Card/Bubble */}
-                  <div className="markdown-content text-foreground/90">
-                    {message.role === "user" ? (
-                      <p className="my-0 whitespace-pre-wrap leading-7">{message.content}</p>
-                    ) : (
+                    {message.error && (
+                      <div className="flex items-center gap-2 mb-2 text-destructive text-sm font-medium">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>{language === "en" ? "Error" : "त्रुटि"}</span>
+                      </div>
+                    )}
+
+                    <div className="prose prose-sm max-w-none text-foreground/90">
                       <ReactMarkdown 
                         remarkPlugins={[remarkGfm]}
                         components={markdownComponents}
                       >
                         {message.content}
                       </ReactMarkdown>
-                    )}
-                  </div>
+                    </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 rounded-lg hover:bg-accent"
-                        onClick={() => copyMessage(message.content, message.id)}
-                      >
-                        {copiedId === message.id ? (
-                          <Check className="w-3.5 h-3.5" />
-                        ) : (
-                          <Copy className="w-3.5 h-3.5" />
-                        )}
-                      </Button>
-                    </motion.div>
+                    <div className="flex items-center gap-2 pt-2">
+                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 rounded-lg hover:bg-accent"
+                          onClick={() => copyMessage(message.content, message.id)}
+                        >
+                          {copiedId === message.id ? (
+                            <Check className="w-3.5 h-3.5" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </Button>
+                      </motion.div>
 
-                    {message.role === "assistant" && (
-                      <>
+                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 rounded-lg hover:bg-accent"
+                          onClick={() => speakText(message.content)}
+                          disabled={isSpeaking}
+                        >
+                          <Volume2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </motion.div>
+
+                      {messages[messages.length - 1].id === message.id && (
                         <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 rounded-lg hover:bg-accent"
-                            onClick={() => speakText(message.content)}
-                            disabled={isSpeaking}
+                            onClick={regenerateResponse}
+                            disabled={isLoading}
                           >
-                            <Volume2 className="w-3.5 h-3.5" />
+                            <RefreshCw className="w-3.5 h-3.5" />
                           </Button>
                         </motion.div>
+                      )}
 
-                        {messages[messages.length - 1].id === message.id && (
-                          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 rounded-lg hover:bg-accent"
-                              onClick={regenerateResponse}
-                              disabled={isLoading}
-                            >
-                              <RefreshCw className="w-3.5 h-3.5" />
-                            </Button>
-                          </motion.div>
-                        )}
-                      </>
-                    )}
-
-                    <span className="text-xs text-muted-foreground ml-auto">
-                      {message.timestamp.toLocaleTimeString([], { 
-                        hour: "2-digit", 
-                        minute: "2-digit" 
-                      })}
-                    </span>
+                      <span className="text-xs text-muted-foreground ml-auto">
+                        {message.timestamp.toLocaleTimeString([], { 
+                          hour: "2-digit", 
+                          minute: "2-digit" 
+                        })}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </motion.div>
           ))}
         </AnimatePresence>
@@ -830,7 +841,7 @@ export function Chatbot() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group py-6 sm:py-8 border-t border-border/30"
+            className="group py-6"
           >
             <div className="flex items-start gap-4">
               <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center flex-shrink-0">
