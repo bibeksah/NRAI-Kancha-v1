@@ -28,9 +28,8 @@ export class SpeechService {
     this.region = region
   }
 
-  // Speech-to-Text (STT)
+  // Speech-to-Text (STT) with auto-language detection
   async recognizeSpeech(
-    language: Language,
     onResult: (text: string) => void,
     onError: (error: string) => void,
   ): Promise<void> {
@@ -40,16 +39,36 @@ export class SpeechService {
     }
 
     return new Promise((resolve, reject) => {
-      // Set language
-      const languageCode = language === "en" ? "en-US" : "ne-NP"
-      this.speechConfig!.speechRecognitionLanguage = languageCode
+      // Set up auto-detect configuration for English and Nepali
+      // Note: Using SourceLanguageConfig instead for better Nepali support
+      const sourceLanguageConfigs = [
+        sdk.SourceLanguageConfig.fromLanguage("en-US"),
+        sdk.SourceLanguageConfig.fromLanguage("ne-NP")
+      ]
+
+      const autoDetectSourceLanguageConfig = sdk.AutoDetectSourceLanguageConfig.fromSourceLanguageConfigs(
+        sourceLanguageConfigs
+      )
 
       const audioConfig = sdk.AudioConfig.fromDefaultMicrophoneInput()
-      this.recognizer = new sdk.SpeechRecognizer(this.speechConfig!, audioConfig)
+      
+      // Use FromConfig static method for auto-language detection
+      this.recognizer = sdk.SpeechRecognizer.FromConfig(
+        this.speechConfig!,
+        autoDetectSourceLanguageConfig,
+        audioConfig
+      )
 
       this.recognizer.recognizeOnceAsync(
         (result) => {
           if (result.reason === sdk.ResultReason.RecognizedSpeech) {
+            // Get the detected language from the result
+            const autoDetectResult = sdk.AutoDetectSourceLanguageResult.fromResult(result)
+            const detectedLanguage = autoDetectResult.language
+            
+            console.log(`Detected language: ${detectedLanguage}`)
+            console.log(`Recognized text: ${result.text}`)
+            
             onResult(result.text)
             resolve()
           } else if (result.reason === sdk.ResultReason.NoMatch) {
@@ -81,7 +100,21 @@ export class SpeechService {
     }
   }
 
-  // Text-to-Speech (TTS) with Yunyi Multilingual voice (auto-detects language)
+  // Detect language from text (Devanagari script = Nepali, Latin = English)
+  private detectLanguageFromText(text: string): "en" | "ne" {
+    const devanagariRegex = /[\u0900-\u097F]/
+    const hasNepali = devanagariRegex.test(text)
+    
+    if (hasNepali) {
+      const nepaliChars = (text.match(/[\u0900-\u097F]/g) || []).length
+      const englishChars = (text.match(/[A-Za-z]/g) || []).length
+      return nepaliChars > englishChars ? "ne" : "en"
+    }
+    
+    return "en"
+  }
+
+  // Text-to-Speech (TTS) with optimized voices for instant playback
   async synthesizeSpeech(text: string, onAudioData?: (audio: ArrayBuffer) => void): Promise<void> {
     if (!this.speechConfig) {
       return Promise.reject(new Error("Speech service not initialized"))
@@ -91,8 +124,12 @@ export class SpeechService {
     this.stopSynthesis()
 
     return new Promise((resolve, reject) => {
-      // Use Yunyi Multilingual voice - auto-detects English, Nepali, and 90+ other languages
-      const voiceName = "zh-CN-YunyiMultilingualNeural"
+      // Detect language and use optimized voice (non-multilingual = instant)
+      const detectedLanguage = this.detectLanguageFromText(text)
+      const voiceName = detectedLanguage === "en" 
+        ? "en-US-AvaNeural"      // Fast English voice
+        : "ne-NP-HemkalaNeural"  // Fast Nepali voice
+      
       this.speechConfig!.speechSynthesisVoiceName = voiceName
 
       // Create a push audio output stream to prevent auto-playback

@@ -118,6 +118,7 @@ export function Chatbot() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [isOnline, setIsOnline] = useState(true)
+  const [threadId, setThreadId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const speechServiceRef = useRef<SpeechService | null>(null)
@@ -153,6 +154,9 @@ export function Chatbot() {
         }
       }
 
+      const savedThreadId = localStorage.getItem("nrai-kancha-thread-id")
+      if (savedThreadId) setThreadId(savedThreadId)
+
       const savedLanguage = localStorage.getItem("nrai-kancha-language")
       if (savedLanguage) setLanguage(savedLanguage as Language)
 
@@ -169,6 +173,13 @@ export function Chatbot() {
       localStorage.setItem("nrai-kancha-messages", JSON.stringify(messages))
     }
   }, [messages])
+
+  // Save threadId
+  useEffect(() => {
+    if (typeof window !== "undefined" && threadId) {
+      localStorage.setItem("nrai-kancha-thread-id", threadId)
+    }
+  }, [threadId])
 
   // Save preferences
   useEffect(() => {
@@ -222,7 +233,7 @@ export function Chatbot() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: text, threadId }),
       })
 
       if (!response.ok) {
@@ -230,6 +241,11 @@ export function Chatbot() {
       }
 
       const data = await response.json()
+
+      // Update threadId if we got a new one
+      if (data.threadId) {
+        setThreadId(data.threadId)
+      }
 
       if (data.messages) {
         const messagesWithDates = data.messages.map((msg: any) => ({
@@ -285,8 +301,8 @@ export function Chatbot() {
 
     setIsListening(true)
     try {
+      // Auto-detect language (English or Nepali)
       await speechServiceRef.current.recognizeSpeech(
-        language,
         (text) => {
           setInput(text)
           setIsListening(false)
@@ -355,7 +371,9 @@ export function Chatbot() {
 
   const clearChat = () => {
     setMessages([])
+    setThreadId(null)
     localStorage.removeItem("nrai-kancha-messages")
+    localStorage.removeItem("nrai-kancha-thread-id")
     setShowSettings(false)
   }
 
