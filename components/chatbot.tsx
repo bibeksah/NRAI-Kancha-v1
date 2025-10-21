@@ -324,7 +324,8 @@ export function Chatbot() {
     }, 100)
 
     try {
-      await speechServiceRef.current.synthesizeSpeech(text, language)
+      // Yunyi Multilingual voice auto-detects language (English/Nepali)
+      await speechServiceRef.current.synthesizeSpeech(text)
     } catch (error) {
       console.error("Speech synthesis error:", error)
     } finally {

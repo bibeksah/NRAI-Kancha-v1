@@ -81,8 +81,8 @@ export class SpeechService {
     }
   }
 
-  // Text-to-Speech (TTS)
-  async synthesizeSpeech(text: string, language: Language, onAudioData?: (audio: ArrayBuffer) => void): Promise<void> {
+  // Text-to-Speech (TTS) with Yunyi Multilingual voice (auto-detects language)
+  async synthesizeSpeech(text: string, onAudioData?: (audio: ArrayBuffer) => void): Promise<void> {
     if (!this.speechConfig) {
       return Promise.reject(new Error("Speech service not initialized"))
     }
@@ -91,8 +91,8 @@ export class SpeechService {
     this.stopSynthesis()
 
     return new Promise((resolve, reject) => {
-      // Set voice based on language
-      const voiceName = language === "en" ? "en-US-AvaMultilingualNeural" : "ne-NP-HemkalaNeural"
+      // Use Yunyi Multilingual voice - auto-detects English, Nepali, and 90+ other languages
+      const voiceName = "zh-CN-YunyiMultilingualNeural"
       this.speechConfig!.speechSynthesisVoiceName = voiceName
 
       // Create a push audio output stream to prevent auto-playback
