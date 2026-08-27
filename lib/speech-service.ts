@@ -2,6 +2,38 @@ import * as sdk from "microsoft-cognitiveservices-speech-sdk"
 
 export type Language = "en" | "ne"
 
+/**
+ * Strip markdown syntax from text for TTS
+ */
+function stripMarkdownForTTS(text: string): string {
+  return text
+    // Remove headers (# ## ### etc)
+    .replace(/^#{1,6}\s+/gm, '')
+    // Remove bold/italic markers
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/_([^_]+)_/g, '$1')
+    // Remove inline code
+    .replace(/`([^`]+)`/g, '$1')
+    // Remove code blocks
+    .replace(/```[\s\S]*?```/g, '')
+    // Remove links - keep text, remove URL
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    // Remove images
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+    // Remove blockquotes
+    .replace(/^>\s+/gm, '')
+    // Remove horizontal rules
+    .replace(/^[-*_]{3,}$/gm, '')
+    // Remove list markers
+    .replace(/^[\s]*[-*+]\s+/gm, '')
+    .replace(/^[\s]*\d+\.\s+/gm, '')
+    // Remove extra whitespace
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 export interface SpeechConfig {
   subscriptionKey?: string
   region?: string
@@ -123,9 +155,16 @@ export class SpeechService {
     // Stop any ongoing synthesis
     this.stopSynthesis()
 
+    // Strip markdown syntax for cleaner TTS
+    const cleanText = stripMarkdownForTTS(text)
+
+    if (!cleanText) {
+      return Promise.resolve() // Nothing to speak
+    }
+
     return new Promise((resolve, reject) => {
       // Detect language and use optimized voice (non-multilingual = instant)
-      const detectedLanguage = this.detectLanguageFromText(text)
+      const detectedLanguage = this.detectLanguageFromText(cleanText)
       const voiceName = detectedLanguage === "en" 
         ? "en-US-AvaNeural"      // Fast English voice
         : "ne-NP-HemkalaNeural"  // Fast Nepali voice
@@ -143,7 +182,7 @@ export class SpeechService {
       let audioDataChunks: Uint8Array[] = []
 
       this.synthesizer.speakTextAsync(
-        text,
+        cleanText,
         async (result) => {
           if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
             if (onAudioData && result.audioData) {

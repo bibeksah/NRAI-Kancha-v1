@@ -1,65 +1,68 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { AzureAssistantService } from "@/lib/azure-assistant"
+import { type NextRequest } from "next/server"
+import { runKanchaAgent } from "@/lib/kancha-agent/agent"
 
 export const runtime = "nodejs"
 
-function getAssistantService() {
-  const endpoint = process.env.AZURE_OPENAI_ENDPOINT
-  const apiKey = process.env.AZURE_OPENAI_KEY
-  const assistantId = process.env.AZURE_ASSISTANT_ID
-
-  if (!endpoint || !apiKey || !assistantId) {
-    throw new Error(
-      "Missing required environment variables: AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY, and AZURE_ASSISTANT_ID. " +
-        "Please add them to your .env.local file.",
-    )
-  }
-  return new AzureAssistantService(endpoint, apiKey, assistantId)
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const { message, threadId } = await request.json()
-    if (!message) {
-      return NextResponse.json({ error: "Message is required" }, { status: 400 })
-    }
-    const service = getAssistantService()
-    let activeThreadId = threadId
-    if (!activeThreadId) {
-      activeThreadId = await service.createThread()
-    }
-    const messages = await service.sendMessage(activeThreadId, message)
-    return NextResponse.json({ messages, threadId: activeThreadId })
-  } catch (error) {
-    let errorMessage = "Failed to process message"
-    if (error instanceof Error) {
-      errorMessage = error.message
-      if (errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
-        errorMessage += " - Check that AZURE_OPENAI_KEY is valid"
-      } else if (errorMessage.includes("404") || errorMessage.includes("Not Found")) {
-        errorMessage += " - Verify that AZURE_OPENAI_ENDPOINT and AZURE_ASSISTANT_ID are correct"
-      } else if (errorMessage.includes("429") || errorMessage.includes("rate limit")) {
-        errorMessage += " - API rate limit exceeded, please try again later"
-      }
-    }
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 },
-    )
-  }
-}
+    const body = await request.json()
+    const { messages, language, model, clientApiKey: bodyKey, clientBaseUrl: bodyBaseUrl } = body
 
-export async function GET(request: NextRequest) {
-  try {
-    const threadId = request.nextUrl.searchParams.get("threadId")
-    if (!threadId) {
-      return NextResponse.json({ error: "threadId is required" }, { status: 400 })
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return new Response(JSON.stringify({ error: "Messages array is required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
+      })
     }
-    const service = getAssistantService()
-    const messages = await service.getThreadMessages(threadId)
-    return NextResponse.json({ messages })
+
+    // Header overrides take precedence if provided
+    const clientApiKey = request.headers.get("x-deepseek-api-key") || bodyKey || undefined
+    const clientBaseUrl = request.headers.get("x-deepseek-base-url") || bodyBaseUrl || undefined
+
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          const generator = runKanchaAgent({
+            messages,
+            language: language || "en",
+            model: model || process.env.DEEPSEEK_MODEL || "deepseekv4-flash",
+            clientApiKey,
+            clientBaseUrl
+          })
+
+          for await (const event of generator) {
+            const data = `data: ${JSON.stringify(event)}\n\n`
+            controller.enqueue(encoder.encode(data))
+          }
+
+          controller.close()
+        } catch (err) {
+          const errorMsg = err instanceof Error ? err.message : String(err)
+          const errorEvent = `data: ${JSON.stringify({ type: "error", content: errorMsg })}\n\n`
+          controller.enqueue(encoder.encode(errorEvent))
+          controller.close()
+        }
+      }
+    })
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        "Connection": "keep-alive",
+        "X-Content-Type-Options": "nosniff"
+      }
+    })
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Failed to retrieve messages"
-    return NextResponse.json({ error: errorMessage }, { status: 500 })
+    return new Response(
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Failed to process chat request"
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      }
+    )
   }
 }

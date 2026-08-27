@@ -1,20 +1,20 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { 
-  Mic, 
-  MicOff, 
-  Volume2, 
+import {
+  Mic,
+  MicOff,
+  Volume2,
   VolumeX,
-  Send, 
-  Loader2, 
-  Languages, 
-  Copy, 
-  Trash2, 
+  Send,
+  Loader2,
+  Languages,
+  Copy,
+  Trash2,
   RefreshCw,
   Check,
   Sparkles,
@@ -32,7 +32,10 @@ import { cn } from "@/lib/utils"
 import { SpeechService, type Language } from "@/lib/speech-service"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
+import rehypeHighlight from "rehype-highlight"
 import type { Components } from "react-markdown"
+import DOMPurify from "isomorphic-dompurify"
+import { storedMessagesSchema, languageSchema, safeParseJSON } from "@/lib/validation"
 
 interface Message {
   id: string
@@ -41,6 +44,17 @@ interface Message {
   timestamp: Date
   error?: boolean
 }
+
+// Message limit per conversation
+const MAX_MESSAGES_PER_CONVERSATION = 10
+
+// Storage keys - centralized for consistency
+const STORAGE_KEYS = {
+  messages: "nrai-kancha-messages",
+  threadId: "nrai-kancha-thread-id",
+  language: "nrai-kancha-language",
+  autoSpeak: "nrai-kancha-auto-speak"
+} as const
 
 const EXAMPLE_PROMPTS = {
   en: [
@@ -55,16 +69,16 @@ const EXAMPLE_PROMPTS = {
     "यसले नेपालको अर्थतन्त्र कसरी बढाउँछ?",
     "यसले सरकारी सेवाहरूलाई डिजिटल कसरी बनाउँछ?"
   ]
-}
+} as const
 
-// Animation variants
+// Animation variants - memoized outside component
 const messageVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
       damping: 30
     }
@@ -81,7 +95,7 @@ const headerVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
       damping: 25
     }
@@ -94,7 +108,7 @@ const settingsPanelVariants = {
     opacity: 1,
     x: 0,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
       damping: 30
     }
@@ -104,6 +118,73 @@ const settingsPanelVariants = {
     x: 300,
     transition: { duration: 0.2 }
   }
+}
+
+/**
+ * Safely read from localStorage with validation
+ */
+function safeGetStorage<T>(key: string, validator: (val: unknown) => T | null, fallback: T): T {
+  if (typeof window === "undefined") return fallback
+
+  try {
+    const stored = localStorage.getItem(key)
+    if (!stored) return fallback
+
+    const parsed = JSON.parse(stored)
+    const validated = validator(parsed)
+    return validated !== null ? validated : fallback
+  } catch {
+    // Remove corrupted data
+    localStorage.removeItem(key)
+    return fallback
+  }
+}
+
+/**
+ * Safely set localStorage
+ */
+function safeSetStorage(key: string, value: unknown): void {
+  if (typeof window === "undefined") return
+
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch (error) {
+    console.error(`Failed to save to localStorage (${key}):`, error)
+  }
+}
+
+/**
+ * Sanitize content for safe display
+ */
+function sanitizeContent(content: string): string {
+  return DOMPurify.sanitize(content, {
+    ALLOWED_TAGS: [], // Strip all HTML for plain text
+    ALLOWED_ATTR: []
+  })
+}
+
+/**
+ * Preprocess markdown to fix common formatting issues
+ * - Extracts inline headings from list items
+ * - Ensures proper spacing around headings
+ */
+function preprocessMarkdown(content: string): string {
+  let processed = content
+
+  // Fix inline headings (e.g., "some text ### Heading more text")
+  // Split them onto their own lines
+  processed = processed.replace(/([^\n])(\s*)(#{1,6}\s+[^\n]+)/g, '$1\n\n$3')
+
+  // Ensure headings have blank line before them (except at start)
+  processed = processed.replace(/([^\n])\n(#{1,6}\s+)/g, '$1\n\n$2')
+
+  // Ensure headings have blank line after them
+  processed = processed.replace(/(#{1,6}\s+[^\n]+)\n([^#\n])/g, '$1\n\n$2')
+
+  // Clean up excessive newlines (more than 2)
+  processed = processed.replace(/\n{3,}/g, '\n\n')
+
+  return processed.trim()
 }
 
 export function Chatbot() {
@@ -119,6 +200,8 @@ export function Chatbot() {
   const [showSettings, setShowSettings] = useState(false)
   const [isOnline, setIsOnline] = useState(true)
   const [threadId, setThreadId] = useState<string | null>(null)
+  const [messageCount, setMessageCount] = useState(0)
+  const [limitReached, setLimitReached] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const speechServiceRef = useRef<SpeechService | null>(null)
@@ -127,66 +210,85 @@ export function Chatbot() {
   useEffect(() => {
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
-    
+
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
-    
+
     return () => {
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }
   }, [])
 
-  // Load messages from localStorage
+  // Load data from localStorage with validation
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedMessages = localStorage.getItem("nrai-kancha-messages")
-      if (savedMessages) {
-        try {
-          const parsed = JSON.parse(savedMessages)
-          const messagesWithDates = parsed.map((msg: any) => ({
+    if (typeof window === "undefined") return
+
+    // Load messages with validation
+    const savedMessages = safeGetStorage(
+      STORAGE_KEYS.messages,
+      (val) => {
+        const result = safeParseJSON(JSON.stringify(val), storedMessagesSchema)
+        if (result.success) {
+          return result.data.map(msg => ({
             ...msg,
             timestamp: new Date(msg.timestamp)
           }))
-          setMessages(messagesWithDates)
-        } catch (error) {
-          console.error("Failed to load messages:", error)
         }
-      }
-
-      const savedThreadId = localStorage.getItem("nrai-kancha-thread-id")
-      if (savedThreadId) setThreadId(savedThreadId)
-
-      const savedLanguage = localStorage.getItem("nrai-kancha-language")
-      if (savedLanguage) setLanguage(savedLanguage as Language)
-
-      const savedAutoSpeak = localStorage.getItem("nrai-kancha-auto-speak")
-      if (savedAutoSpeak !== null) setAutoSpeak(savedAutoSpeak === "true")
-
-      initializeSpeechService()
+        return null
+      },
+      []
+    )
+    if (savedMessages.length > 0) {
+      setMessages(savedMessages as Message[])
     }
+
+    // Load thread ID
+    const savedThreadId = localStorage.getItem(STORAGE_KEYS.threadId)
+    if (savedThreadId && /^thread_[a-zA-Z0-9]+$/.test(savedThreadId)) {
+      setThreadId(savedThreadId)
+    }
+
+    // Load language with validation
+    const savedLanguage = localStorage.getItem(STORAGE_KEYS.language)
+    if (savedLanguage) {
+      const langResult = languageSchema.safeParse(savedLanguage)
+      if (langResult.success) {
+        setLanguage(langResult.data)
+      }
+    }
+
+    // Load auto-speak preference
+    const savedAutoSpeak = localStorage.getItem(STORAGE_KEYS.autoSpeak)
+    if (savedAutoSpeak !== null) {
+      setAutoSpeak(savedAutoSpeak === "true")
+    }
+
+    initializeSpeechService()
   }, [])
 
-  // Save messages
+  // Save messages - debounced
   useEffect(() => {
-    if (typeof window !== "undefined" && messages.length > 0) {
-      localStorage.setItem("nrai-kancha-messages", JSON.stringify(messages))
-    }
+    if (typeof window === "undefined" || messages.length === 0) return
+
+    const timeoutId = setTimeout(() => {
+      safeSetStorage(STORAGE_KEYS.messages, messages)
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
   }, [messages])
 
   // Save threadId
   useEffect(() => {
-    if (typeof window !== "undefined" && threadId) {
-      localStorage.setItem("nrai-kancha-thread-id", threadId)
-    }
+    if (typeof window === "undefined" || !threadId) return
+    localStorage.setItem(STORAGE_KEYS.threadId, threadId)
   }, [threadId])
 
   // Save preferences
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("nrai-kancha-language", language)
-      localStorage.setItem("nrai-kancha-auto-speak", String(autoSpeak))
-    }
+    if (typeof window === "undefined") return
+    localStorage.setItem(STORAGE_KEYS.language, language)
+    localStorage.setItem(STORAGE_KEYS.autoSpeak, String(autoSpeak))
   }, [language, autoSpeak])
 
   const scrollToBottom = useCallback(() => {
@@ -212,13 +314,17 @@ export function Chatbot() {
     }
   }
 
-  const sendMessage = async (text: string) => {
-    if (!text.trim() || !isOnline) return
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || !isOnline || limitReached) return
+
+    // Sanitize input
+    const sanitizedText = sanitizeContent(text.trim())
+    if (!sanitizedText) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: text,
+      content: sanitizedText,
       timestamp: new Date(),
     }
     setMessages((prev) => [...prev, userMessage])
@@ -233,11 +339,20 @@ export function Chatbot() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, threadId }),
+        body: JSON.stringify({ message: sanitizedText, threadId }),
       })
 
       if (!response.ok) {
-        throw new Error("Failed to send message")
+        const errorData = await response.json().catch(() => ({}))
+
+        // Handle message limit reached
+        if (errorData.limitReached) {
+          setLimitReached(true)
+          setMessageCount(errorData.messageCount || MAX_MESSAGES_PER_CONVERSATION)
+          throw new Error(errorData.message || "Message limit reached")
+        }
+
+        throw new Error(errorData.error || "Failed to send message")
       }
 
       const data = await response.json()
@@ -248,12 +363,20 @@ export function Chatbot() {
       }
 
       if (data.messages) {
-        const messagesWithDates = data.messages.map((msg: any) => ({
+        const messagesWithDates = data.messages.map((msg: Record<string, unknown>) => ({
           ...msg,
-          timestamp: new Date(msg.timestamp),
+          timestamp: new Date(msg.timestamp as string),
           error: false
         }))
         setMessages(messagesWithDates)
+
+        // Update message count from server response
+        if (typeof data.messageCount === 'number') {
+          setMessageCount(data.messageCount)
+        }
+        if (data.remainingMessages === 0) {
+          setLimitReached(true)
+        }
 
         if (autoSpeak) {
           const lastMessage = data.messages[data.messages.length - 1]
@@ -263,12 +386,13 @@ export function Chatbot() {
         }
       }
     } catch (error) {
+      const errorContent = error instanceof Error ? error.message : "Unknown error occurred"
       const errorMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
-        content: language === "en" 
-          ? "Sorry, I encountered an error. Please try again."
-          : "माफ गर्नुहोस्, मैले त्रुटि सामना गरें। कृपया फेरि प्रयास गर्नुहोस्।",
+        content: language === "en"
+          ? `Sorry, I encountered an error: ${errorContent}`
+          : `माफ गर्नुहोस्, मैले त्रुटि सामना गरें: ${errorContent}`,
         timestamp: new Date(),
         error: true
       }
@@ -276,32 +400,31 @@ export function Chatbot() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [isOnline, threadId, language, autoSpeak, limitReached])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
     sendMessage(input)
-  }
+  }, [input, sendMessage])
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       sendMessage(input)
     }
-  }
+  }, [input, sendMessage])
 
-  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTextareaChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value)
     e.target.style.height = 'auto'
     e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px'
-  }
+  }, [])
 
-  const startListening = async () => {
+  const startListening = useCallback(async () => {
     if (!speechServiceRef.current) return
 
     setIsListening(true)
     try {
-      // Auto-detect language (English or Nepali)
       await speechServiceRef.current.recognizeSpeech(
         (text) => {
           setInput(text)
@@ -317,20 +440,19 @@ export function Chatbot() {
       console.error("Failed to start listening:", error)
       setIsListening(false)
     }
-  }
+  }, [sendMessage])
 
-  const stopListening = () => {
+  const stopListening = useCallback(() => {
     speechServiceRef.current?.stopRecognition()
     setIsListening(false)
-  }
+  }, [])
 
-  const speakText = async (text: string, messageId: string) => {
+  const speakText = useCallback(async (text: string, messageId: string) => {
     if (!speechServiceRef.current || isSpeaking) return
 
     setIsSpeaking(true)
     setSpeakingMessageId(messageId)
-    
-    // Poll to keep button state synced with actual speech state
+
     const pollInterval = setInterval(() => {
       if (speechServiceRef.current && !speechServiceRef.current.isSpeaking()) {
         clearInterval(pollInterval)
@@ -340,7 +462,6 @@ export function Chatbot() {
     }, 100)
 
     try {
-      // Yunyi Multilingual voice auto-detects language (English/Nepali)
       await speechServiceRef.current.synthesizeSpeech(text)
     } catch (error) {
       console.error("Speech synthesis error:", error)
@@ -349,17 +470,17 @@ export function Chatbot() {
       setIsSpeaking(false)
       setSpeakingMessageId(null)
     }
-  }
+  }, [isSpeaking])
 
-  const stopSpeaking = () => {
+  const stopSpeaking = useCallback(() => {
     if (speechServiceRef.current) {
       speechServiceRef.current.stopSynthesis()
     }
     setIsSpeaking(false)
     setSpeakingMessageId(null)
-  }
+  }, [])
 
-  const copyMessage = async (content: string, id: string) => {
+  const copyMessage = useCallback(async (content: string, id: string) => {
     try {
       await navigator.clipboard.writeText(content)
       setCopiedId(id)
@@ -367,29 +488,31 @@ export function Chatbot() {
     } catch (error) {
       console.error("Failed to copy message:", error)
     }
-  }
+  }, [])
 
-  const clearChat = () => {
+  const clearChat = useCallback(() => {
     setMessages([])
     setThreadId(null)
-    localStorage.removeItem("nrai-kancha-messages")
-    localStorage.removeItem("nrai-kancha-thread-id")
+    setMessageCount(0)
+    setLimitReached(false)
+    localStorage.removeItem(STORAGE_KEYS.messages)
+    localStorage.removeItem(STORAGE_KEYS.threadId)
     setShowSettings(false)
-  }
+  }, [])
 
-  const regenerateResponse = async () => {
+  const regenerateResponse = useCallback(async () => {
     if (messages.length < 2) return
-    
+
     const lastUserMessage = [...messages].reverse().find(msg => msg.role === "user")
     if (!lastUserMessage) return
 
     const indexOfLastUser = messages.findIndex(msg => msg.id === lastUserMessage.id)
     setMessages(messages.slice(0, indexOfLastUser + 1))
-    
-    await sendMessage(lastUserMessage.content)
-  }
 
-  const exportChat = (format: 'txt' | 'json') => {
+    await sendMessage(lastUserMessage.content)
+  }, [messages, sendMessage])
+
+  const exportChat = useCallback((format: 'txt' | 'json') => {
     let content = ''
     let filename = `nrai-kancha-chat-${new Date().toISOString().split('T')[0]}`
 
@@ -411,10 +534,10 @@ export function Chatbot() {
     a.download = filename
     a.click()
     URL.revokeObjectURL(url)
-  }
+  }, [messages])
 
-  // Markdown components for proper formatting
-  const markdownComponents: Components = {
+  // Memoized markdown components for better performance
+  const markdownComponents: Components = useMemo(() => ({
     h1: (props) => <h1 className="text-2xl font-bold mt-6 mb-4 first:mt-0 text-foreground" {...props} />,
     h2: (props) => <h2 className="text-xl font-bold mt-5 mb-3 first:mt-0 text-foreground/95" {...props} />,
     h3: (props) => <h3 className="text-lg font-semibold mt-4 mb-2 first:mt-0 text-foreground/90" {...props} />,
@@ -423,23 +546,43 @@ export function Chatbot() {
     ul: (props) => <ul className="list-disc list-outside ml-6 my-3 space-y-2" {...props} />,
     ol: (props) => <ol className="list-decimal list-outside ml-6 my-3 space-y-2" {...props} />,
     li: (props) => <li className="pl-1 leading-7" {...props} />,
-    a: (props) => <a className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors font-medium" {...props} />,
-    code: ({inline, ...props}) => 
-      inline ? 
-        <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono border border-border/30" {...props} /> : 
-        <code className="block bg-muted p-4 rounded-lg overflow-x-auto my-3 text-sm border border-border/30" {...props} />,
-    pre: (props) => <pre className="bg-muted p-4 rounded-lg overflow-x-auto my-3 border border-border/30" {...props} />,
+    a: (props) => (
+      <a
+        className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors font-medium"
+        target="_blank"
+        rel="noopener noreferrer"
+        {...props}
+      />
+    ),
+    code: ({ className, children, ...props }) => {
+      const isInline = !className
+      return isInline ? (
+        <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono border border-border/30" {...props}>
+          {children}
+        </code>
+      ) : (
+        <code className={cn("block text-sm", className)} {...props}>
+          {children}
+        </code>
+      )
+    },
+    pre: (props) => (
+      <pre className="bg-zinc-900 text-zinc-100 p-4 rounded-lg overflow-x-auto my-3 border border-border/30 text-sm" {...props} />
+    ),
     blockquote: (props) => <blockquote className="border-l-4 border-primary/40 pl-4 italic my-3 text-muted-foreground bg-muted/30 py-2 rounded-r" {...props} />,
-    hr: (props) => <hr className="border-t-2 border-border/50 my-6" {...props} />,
+    hr: () => <hr className="border-t-2 border-border/50 my-6" />,
     table: (props) => <table className="w-full border-collapse my-4 border border-border rounded-lg overflow-hidden" {...props} />,
     thead: (props) => <thead className="bg-muted/50" {...props} />,
     th: (props) => <th className="px-4 py-2 text-left font-semibold border-b border-border" {...props} />,
     td: (props) => <td className="px-4 py-2 border-t border-border" {...props} />,
     tbody: (props) => <tbody {...props} />,
     tr: (props) => <tr className="hover:bg-muted/30 transition-colors" {...props} />,
-    img: (props) => <img className="max-w-full h-auto rounded-lg my-3 border border-border/30" {...props} />,
+    img: (props) => <img className="max-w-full h-auto rounded-lg my-3 border border-border/30" alt="" {...props} />,
     strong: (props) => <strong className="font-bold text-foreground" {...props} />,
-  }
+  }), [])
+
+  // Memoized example prompts for current language
+  const currentPrompts = useMemo(() => EXAMPLE_PROMPTS[language], [language])
 
   return (
     <div className="flex flex-col min-h-[100dvh] w-full bg-background relative">
@@ -481,7 +624,7 @@ export function Chatbot() {
                 NRAI Kancha
               </h1>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <div 
+                <div
                   className={cn(
                     "w-1.5 h-1.5 rounded-full",
                     isOnline ? "bg-success animate-pulse-glow" : "bg-destructive"
@@ -651,7 +794,7 @@ export function Chatbot() {
                     {language === "en" ? "Clear All Messages" : "सबै सन्देश हटाउनुहोस्"}
                   </Button>
                   <p className="text-xs text-muted-foreground">
-                    {language === "en" 
+                    {language === "en"
                       ? "This will permanently delete all messages. This action cannot be undone."
                       : "यसले सबै सन्देशहरू स्थायी रूपमा मेटाउनेछ। यो कार्य पूर्ववत गर्न सकिँदैन।"}
                   </p>
@@ -660,7 +803,7 @@ export function Chatbot() {
                 {/* Info */}
                 <div className="pt-4 border-t border-border space-y-2">
                   <p className="text-xs text-muted-foreground">
-                    {language === "en" 
+                    {language === "en"
                       ? `${messages.length} message${messages.length !== 1 ? 's' : ''} in conversation`
                       : `कुराकानीमा ${messages.length} सन्देश`}
                   </p>
@@ -681,11 +824,11 @@ export function Chatbot() {
             className="flex flex-col items-center justify-center h-full text-center px-6 py-12"
           >
             <motion.div
-              animate={{ 
+              animate={{
                 scale: [1, 1.05, 1],
                 rotate: [0, 5, -5, 0]
               }}
-              transition={{ 
+              transition={{
                 duration: 4,
                 repeat: Infinity,
                 repeatType: "reverse"
@@ -702,13 +845,13 @@ export function Chatbot() {
                 ? "Your intelligent bilingual assistant. Start a conversation by typing or using voice input."
                 : "तपाईंको बुद्धिमान द्विभाषी सहायक। टाइप गरेर वा आवाज इनपुट प्रयोग गरेर कुराकानी सुरु गर्नुहोस्।"}
             </p>
-            
+
             <div className="w-full max-w-2xl">
               <p className="text-sm font-semibold text-muted-foreground mb-4">
                 {language === "en" ? "Try asking:" : "प्रयास गर्नुहोस्:"}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {EXAMPLE_PROMPTS[language].map((prompt, index) => (
+                {currentPrompts.map((prompt, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 20 }}
@@ -731,7 +874,7 @@ export function Chatbot() {
         )}
 
         <AnimatePresence mode="popLayout">
-          {messages.map((message, index) => (
+          {messages.map((message) => (
             <motion.div
               key={message.id}
               variants={messageVariants}
@@ -754,15 +897,15 @@ export function Chatbot() {
                       className="gradient-bg text-white rounded-3xl px-5 py-4 shadow-medium"
                     >
                       <p className="whitespace-pre-wrap leading-7 text-white">{message.content}</p>
-                      
+
                       <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/20">
                         <span className="text-xs text-white/75">
-                          {message.timestamp.toLocaleTimeString([], { 
-                            hour: "2-digit", 
-                            minute: "2-digit" 
+                          {message.timestamp.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit"
                           })}
                         </span>
-                        
+
                         <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                           <Button
                             variant="ghost"
@@ -780,7 +923,7 @@ export function Chatbot() {
                       </div>
                     </motion.div>
                   </div>
-                  
+
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -815,11 +958,12 @@ export function Chatbot() {
                     )}
 
                     <div className="prose prose-sm max-w-none text-foreground/90">
-                      <ReactMarkdown 
+                      <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
+                        rehypePlugins={[rehypeHighlight]}
                         components={markdownComponents}
                       >
-                        {message.content}
+                        {preprocessMarkdown(message.content)}
                       </ReactMarkdown>
                     </div>
 
@@ -876,9 +1020,9 @@ export function Chatbot() {
                       )}
 
                       <span className="text-xs text-muted-foreground ml-auto">
-                        {message.timestamp.toLocaleTimeString([], { 
-                          hour: "2-digit", 
-                          minute: "2-digit" 
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit"
                         })}
                       </span>
                     </div>
@@ -927,6 +1071,54 @@ export function Chatbot() {
         className="sticky bottom-0 z-20 px-4 py-4 sm:px-6 border-t border-border/30 bg-white/95 backdrop-blur-xl"
       >
         <div className="max-w-4xl mx-auto">
+          {/* Message Limit Reached Banner */}
+          {limitReached && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="w-5 h-5 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-amber-800">
+                    {language === "en" ? "Message limit reached" : "सन्देश सीमा पुग्यो"}
+                  </p>
+                  <p className="text-sm text-amber-700">
+                    {language === "en"
+                      ? "You've used all 10 messages in this conversation."
+                      : "तपाईंले यस कुराकानीमा सबै १० सन्देशहरू प्रयोग गर्नुभयो।"}
+                  </p>
+                </div>
+                <Button
+                  onClick={clearChat}
+                  className="gradient-bg text-white hover:shadow-medium"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  {language === "en" ? "New Chat" : "नयाँ च्याट"}
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Remaining Messages Indicator */}
+          {messages.length > 0 && !limitReached && (
+            <div className="mb-2 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <span>
+                {language === "en"
+                  ? `${MAX_MESSAGES_PER_CONVERSATION - messageCount} messages remaining`
+                  : `${MAX_MESSAGES_PER_CONVERSATION - messageCount} सन्देशहरू बाँकी`}
+              </span>
+              {messageCount >= MAX_MESSAGES_PER_CONVERSATION - 3 && messageCount < MAX_MESSAGES_PER_CONVERSATION && (
+                <span className="text-amber-600 font-medium">
+                  {language === "en" ? "(Running low!)" : "(कम बाँकी!)"}
+                </span>
+              )}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="flex gap-2">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
@@ -934,7 +1126,7 @@ export function Chatbot() {
                 variant={isListening ? "default" : "outline"}
                 size="icon"
                 onClick={isListening ? stopListening : startListening}
-                disabled={isLoading || !isOnline}
+                disabled={isLoading || !isOnline || limitReached}
                 className={cn(
                   "h-11 w-11 rounded-2xl transition-smooth touch-target",
                   isListening && "bg-destructive hover:bg-destructive/90 shadow-medium animate-pulse-glow"
@@ -949,8 +1141,12 @@ export function Chatbot() {
               value={input}
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
-              placeholder={language === "en" ? "Message NRAI Kancha..." : "NRAI Kancha लाई सन्देश..."}
-              disabled={isLoading || isListening || !isOnline}
+              placeholder={
+                limitReached
+                  ? (language === "en" ? "Start a new conversation to continue..." : "जारी राख्न नयाँ कुराकानी सुरु गर्नुहोस्...")
+                  : (language === "en" ? "Message NRAI Kancha..." : "NRAI Kancha लाई सन्देश...")
+              }
+              disabled={isLoading || isListening || !isOnline || limitReached}
               className="flex-1 min-h-[44px] max-h-[150px] resize-none bg-background border-border/40 focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-smooth text-base py-3 px-4 rounded-2xl"
               rows={1}
             />
@@ -959,7 +1155,7 @@ export function Chatbot() {
               <Button
                 type="submit"
                 size="icon"
-                disabled={isLoading || !input.trim() || isListening || !isOnline}
+                disabled={isLoading || !input.trim() || isListening || !isOnline || limitReached}
                 className="h-11 w-11 gradient-bg hover:shadow-medium transition-smooth disabled:opacity-50 rounded-2xl touch-target"
               >
                 {isLoading ? (

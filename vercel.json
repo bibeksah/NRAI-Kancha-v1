@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "bun install",
+  "buildCommand": "NEXT_PRIVATE_SKIP_TURBOPACK=1 next build",
+  "framework": "nextjs"
+}

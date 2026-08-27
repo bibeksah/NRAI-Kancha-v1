@@ -1,11 +1,9 @@
-"use client"
-
-import { Chatbot } from "@/components/chatbot"
+import { ChatContainer } from "@/components/kancha/chat-container"
 
 export default function Home() {
   return (
-    <main className="min-h-[100dvh] w-full flex">
-      <Chatbot />
+    <main className="h-[100dvh] w-full flex overflow-hidden">
+      <ChatContainer initialLanguage="ne" isEmbedded={false} />
     </main>
   )
 }

@@ -1,206 +1,107 @@
-# Azure AI Chatbot with Voice Capabilities
+# 🇳🇵 NRAI Kancha (कान्छा) — Autonomous AI Civic Agent
 
-A comprehensive AI chatbot that connects to Azure AI Foundry-deployed agents with full voice capabilities supporting both Nepali and English languages.
+**NRAI Kancha** is the official AI Civic Agent for [Nepal Reforms](https://nepalreforms.com), powered by **DeepSeek AI** (`deepseek-v4-flash`). It provides grounded, evidence-based, and non-partisan intelligence on Nepal's 27 Transformative Reform proposals, the Constitution of Nepal 2072, comparative global case studies, and budget accountability.
 
-## Features
+---
 
-- ✅ **Azure AI Foundry Integration**: Secure connection with hybrid authentication (API key or Azure Identity)
-- ✅ **Bilingual Support**: Seamless switching between English and Nepali
-- ✅ **Voice Input (STT)**: Speech-to-text using Azure Speech Services
-- ✅ **Voice Output (TTS)**: Text-to-speech with auto-speak functionality
-- ✅ **Iframe Embeddable**: Easy integration into any website
-- ✅ **Modern UI**: Dark theme with professional design
-- ✅ **Responsive**: Works on all device sizes
+## 🌟 Key Features
 
-## Setup Instructions
+- **⚡ DeepSeek AI Autonomous Engine**: Native streaming agent loop with `deepseek-v4-flash`, multi-turn function calling, and deep reasoning traces.
+- **🧠 27 Reform Dossiers & Knowledge Base**: Complete structured implementation blueprints, problem analyses, phased solutions (Phase 1 Statutory & Phase 2 Constitutional), and performance targets.
+- **⚖️ Constitutional Grounding**: Built-in analysis of the Constitution of Nepal 2072 (Article 76, Articles 238–239, Article 242, Article 274, Schedules 5–9).
+- **🛠️ Autonomous Agent Tools**:
+  - `search_reforms`: Keyword & semantic discovery across all 27 reforms.
+  - `get_reform_details`: Complete phased implementation roadmaps.
+  - `get_comparative_evidence`: Global benchmarks (Singapore CPIB, Hong Kong ICAC, Estonia e-Gov, Indonesia KPK).
+  - `analyze_constitutional_impact`: Constitutional amendments and legal checks.
+  - `calculate_reform_impact`: Fiscal savings, procurement leak reduction, and timeline projections.
+- **🎙️ Bilingual Voice Support (STT & TTS)**:
+  - Speech-to-Text with automatic language detection between **Nepali (नेपाली)** and **English**.
+  - Text-to-Speech audio playback with live animated waveforms and browser Web Speech API fallback + Azure Speech Services.
+- **🎨 Civic UI / UX**: Anti-slop design adhering to the Nepal Pine Emerald & Himalayan Slate palette, interactive citation modals, and multi-session local chat history.
+- **📱 Embeddable Widget (`/embed`)**: Clean iframe-ready layout for embedding across `nepalreforms.com` or external civic platforms.
 
-### 1. Azure AD App Registration (For OAuth Login)
+---
 
-If you want to use interactive Azure login (like 'az login' in the browser), you need to configure an Azure AD app:
+## 🚀 Quick Start
 
-#### Step 1: Create or Configure Azure AD App
+### 1. Install Dependencies (Always use Bun)
 
-1. Go to [Azure Portal → App Registrations](https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/RegisteredApps)
-2. Find your existing app or click "New registration"
-3. Note your **Application (client) ID** and **Directory (tenant) ID**
+```bash
+bun install
+```
 
-#### Step 2: Configure Redirect URI
+### 2. Configure Environment Variables
 
-1. In your app registration, click "Authentication" in the left menu
-2. Under "Platform configurations", click "Add a platform"
-3. Select "Web"
-4. Add your Redirect URI:
-   - For local development: `http://localhost:3000/auth/callback`
-   - For production: `https://your-domain.com/auth/callback`
-   - For v0 preview: `https://your-v0-preview-url.vercel.app/auth/callback`
-5. Click "Configure" and then "Save"
+Create a `.env.local` file:
 
-#### Step 3: Create Client Secret
+```env
+# 🤖 DeepSeek AI Configuration
+DEEPSEEK_API_KEY=your_deepseek_api_key_here
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-v4-flash
 
-1. In your app registration, click "Certificates & secrets"
-2. Click "New client secret"
-3. Add a description and choose expiration
-4. Copy the **Value** (this is your `AZURE_CLIENT_SECRET`)
+# 🎙️ Azure Speech Services (Optional)
+SPEECH_REGION=swedencentral
+SPEECH_KEY=your_speech_key_here
+NEXT_PUBLIC_SPEECH_REGION=swedencentral
+NEXT_PUBLIC_SPEECH_KEY=your_speech_key_here
+```
 
-#### Step 4: Configure API Permissions
+### 3. Run the Development Server
 
-1. In your app registration, click "API permissions"
-2. Click "Add a permission"
-3. Select "Azure Service Management" or "Cognitive Services"
-4. Add the following permissions:
-   - `https://cognitiveservices.azure.com/.default`
-   - `openid`
-   - `profile`
-   - `email`
-5. Click "Grant admin consent" if required
+```bash
+bun run dev
+```
 
-### 2. Azure AI Foundry Setup
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-#### Find Your Project URL and Agent ID
+---
 
-1. Go to [Azure AI Foundry](https://ai.azure.com/)
-2. Open your project
-3. **Project URL**: Click on "Overview" → Copy the "Project connection string" or "Endpoint URL"
-   - Format: `https://your-project.services.ai.azure.com/api/projects/your-project`
-4. **Agent ID**: Go to "Agents" → Select your agent → Copy the "Agent ID"
-   - Format: `asst_xxxxxxxxxxxxx`
+## 📁 Architecture Overview
 
-#### Get API Key (Optional - for Development)
+```
+NRAI-Kancha-v1/
+├── app/
+│   ├── api/
+│   │   ├── chat/route.ts        # Streaming DeepSeek Agent SSE endpoint
+│   │   ├── health/route.ts      # Agent health and model status
+│   │   └── speech-token/route.ts # Azure speech authorization
+│   ├── embed/page.tsx           # Embeddable widget view
+│   ├── globals.css              # Design tokens and styling
+│   └── page.tsx                 # Main application page
+├── components/
+│   └── kancha/
+│       ├── chat-container.tsx   # Master chat orchestrator
+│       ├── chat-header.tsx      # Top bar, model pill & language toggle
+│       ├── chat-sidebar.tsx     # Chat history & reform shortcuts
+│       ├── chat-input.tsx       # Textarea & mic voice input
+│       ├── message-item.tsx     # Message bubbles & action bar
+│       ├── message-reasoning.tsx # Collapsible thought process viewer
+│       ├── reform-badge.tsx     # Interactive reform citation modal
+│       ├── starter-prompts.tsx  # Categorized starter questions
+│       └── settings-modal.tsx   # API key and model configuration
+└── lib/
+    ├── kancha-agent/
+    │   ├── agent.ts             # Multi-step autonomous agent loop
+    │   ├── deepseek-client.ts   # DeepSeek API streaming client
+    │   ├── prompts.ts           # Persona and system prompts
+    │   ├── knowledge/           # 27 Reforms and Constitutional datasets
+    │   └── tools/               # Autonomous agent tool implementations
+    ├── speech/                  # STT / TTS dual engine
+    └── storage/                 # Multi-chat local storage manager
+```
 
-1. In your Azure AI Foundry project, go to "Settings" → "Keys and Endpoint"
-2. Copy "Key 1" or "Key 2"
-3. This is your `AZURE_AI_API_KEY`
+---
 
-### 3. Azure Speech Services Setup
+## 🛠️ Build & Verification
 
-#### Find Your Speech Key and Region
+```bash
+bun run build
+```
 
-1. Go to [Azure Portal](https://portal.azure.com/)
-2. Navigate to your Speech Services resource (or create one)
-3. Go to "Keys and Endpoint"
-4. **Speech Key**: Copy "KEY 1" or "KEY 2"
-5. **Region**: Copy the "Location/Region" (e.g., `eastus`, `westeurope`)
+---
 
-### 4. Environment Variables
+## 📜 License
 
-Add these environment variables in **Project Settings → Environment Variables** in v0:
-
-**Required for all setups:**
-\`\`\`bash
-AZURE_AI_PROJECT_URL=https://your-project.services.ai.azure.com/api/projects/your-project
-AZURE_AI_AGENT_ID=asst_your_agent_id
-SPEECH_KEY=your_speech_key
-SPEECH_REGION=your_region
-\`\`\`
-
-**For OAuth Authentication (Interactive Login):**
-\`\`\`bash
-NEXT_PUBLIC_AZURE_CLIENT_ID=37906225-2b07-402e-ac74-1c16242084d9
-NEXT_PUBLIC_AZURE_TENANT_ID=b58814b6-50ee-4d3d-97e5-fe8167a51c1f
-AZURE_CLIENT_SECRET=your_client_secret
-\`\`\`
-
-**OR for API Key Authentication (Simpler):**
-\`\`\`bash
-AZURE_AI_API_KEY=your_azure_ai_api_key
-\`\`\`
-
-### 5. Authentication Options
-
-#### Option 1: API Key (Recommended for Development)
-Set `AZURE_AI_API_KEY` in environment variables. This is the simplest method for development and preview environments.
-
-#### Option 2: Azure Identity (Production)
-For production deployments without API keys:
-
-**Local Development:**
-\`\`\`bash
-az login
-\`\`\`
-
-**Production (Vercel/Azure):**
-Use Managed Identity or Service Principal:
-\`\`\`bash
-AZURE_CLIENT_ID=your_client_id
-AZURE_CLIENT_SECRET=your_client_secret
-AZURE_TENANT_ID=your_tenant_id
-\`\`\`
-
-### 6. Install and Run
-
-\`\`\`bash
-npm install
-npm run dev
-\`\`\`
-
-Visit `http://localhost:3000` to see the chatbot.
-
-## Embedding the Chatbot
-
-To embed the chatbot in your website:
-
-\`\`\`html
-<iframe 
-    src="https://your-domain.com/embed" 
-    width="100%" 
-    height="600px"
-    style="border: none; border-radius: 12px;"
-    title="AI Chatbot"
-    allow="microphone"
-></iframe>
-\`\`\`
-
-See `/public/embed.html` for a complete example.
-
-## Language Support
-
-### English
-- Voice: en-US-AvaMultilingualNeural
-- Recognition: en-US
-
-### Nepali
-- Voice: ne-NP-HemkalaNeural
-- Recognition: ne-NP
-
-## Architecture
-
-- **Frontend**: Next.js 15 with React 19
-- **Styling**: Tailwind CSS v4 with dark theme
-- **Azure Integration**: @azure/ai-projects with hybrid authentication
-- **Speech**: microsoft-cognitiveservices-speech-sdk with token-based auth
-- **API Routes**: Server-side Azure agent communication (Node.js runtime)
-
-## Security
-
-- Speech tokens generated server-side (10-minute expiry)
-- Azure Identity or API key authentication
-- Server-side agent communication
-- No sensitive keys exposed to client
-- Secure credential management
-
-## Browser Permissions
-
-The chatbot requires microphone permission for voice input. Users will be prompted when they first use the voice feature.
-
-## Troubleshooting
-
-### "DefaultAzureCredential is not supported in the browser"
-- Make sure you've set `AZURE_AI_API_KEY` in environment variables
-- Or ensure you're logged in with `az login` for local development
-
-### "Failed to get speech token"
-- Verify `SPEECH_KEY` and `SPEECH_REGION` are set correctly
-- Check that your Speech Services resource is active in Azure Portal
-
-### "Missing required environment variables"
-- Go to Project Settings (gear icon) → Environment Variables
-- Add all required variables listed in section 4 above
-
-### "The redirect URI specified in the request does not match"
-This means you need to add the redirect URI to your Azure AD app registration:
-1. Go to Azure Portal → App Registrations → Your App
-2. Click "Authentication"
-3. Add the redirect URI shown on the login page
-4. Save and try again
-
-The redirect URI format is: `https://your-domain.com/auth/callback`
+MIT License — Built for the People of Nepal by [Nepal Reforms](https://nepalreforms.com).
