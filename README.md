@@ -1,16 +1,16 @@
 # 🇳🇵 NRAI Kancha (कान्छा) — Autonomous AI Civic Agent
 
-**NRAI Kancha** is the official AI Civic Agent for [Nepal Reforms](https://nepalreforms.com), powered by **DeepSeek AI** (`deepseek-v4-flash`). It provides grounded, evidence-based, and non-partisan intelligence on Nepal's 27 Transformative Reform proposals, the Constitution of Nepal 2072, comparative global case studies, and budget accountability.
+**NRAI Kancha** is the official AI Civic Agent for [Nepal Reforms](https://nepalreforms.com), powered by **DeepSeek AI** (`deepseek-v4-flash`). It provides grounded, evidence-based, and non-partisan intelligence on Nepal's 31 Transformative Reform proposals, the Constitution of Nepal 2072, comparative global case studies, and budget accountability.
 
 ---
 
 ## 🌟 Key Features
 
 - **⚡ DeepSeek AI Autonomous Engine**: Native streaming agent loop with `deepseek-v4-flash`, multi-turn function calling, and deep reasoning traces.
-- **🧠 27 Reform Dossiers & Knowledge Base**: Complete structured implementation blueprints, problem analyses, phased solutions (Phase 1 Statutory & Phase 2 Constitutional), and performance targets.
+- **🧠 31 Reform Dossiers & Knowledge Base**: Complete structured implementation blueprints, problem analyses, phased solutions (Phase 1 Statutory & Phase 2 Constitutional), and performance targets.
 - **⚖️ Constitutional Grounding**: Built-in analysis of the Constitution of Nepal 2072 (Article 76, Articles 238–239, Article 242, Article 274, Schedules 5–9).
 - **🛠️ Autonomous Agent Tools**:
-  - `search_reforms`: Keyword & semantic discovery across all 27 reforms.
+  - `search_reforms`: Keyword & semantic discovery across all 31 reforms.
   - `get_reform_details`: Complete phased implementation roadmaps.
   - `get_comparative_evidence`: Global benchmarks (Singapore CPIB, Hong Kong ICAC, Estonia e-Gov, Indonesia KPK).
   - `analyze_constitutional_impact`: Constitutional amendments and legal checks.

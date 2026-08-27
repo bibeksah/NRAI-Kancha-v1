@@ -124,8 +124,8 @@ export function ChatInput({
           onKeyDown={handleKeyDown}
           placeholder={
             isNe
-              ? "नेपालको २७ सुधार योजना, अख्तियार, निर्वाचन वा बजेटबारे सोध्नुहोस्..."
-              : "Ask about Nepal's 27 reforms, CIAA, elections, constitution, or budget..."
+              ? "नेपालको ३१ सुधार योजना, अख्तियार, निर्वाचन, परराष्ट्र वा बजेटबारे सोध्नुहोस्..."
+              : "Ask about Nepal's 31 reforms, CIAA, elections, constitution, tourism, or budget..."
           }
           disabled={disabled || isGenerating}
           rows={1}

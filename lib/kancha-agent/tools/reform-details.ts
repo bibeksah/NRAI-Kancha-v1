@@ -10,7 +10,7 @@ export async function executeReformDetails(input: ReformDetailsInput) {
   if (!item) {
     return {
       found: false,
-      error: `No reform found with ID ${input.reformId}. Please use search_reforms to discover valid IDs (1 to 27).`
+      error: `No reform found with ID ${input.reformId}. Please use search_reforms to discover valid IDs (1 to 31).`
     }
   }
 

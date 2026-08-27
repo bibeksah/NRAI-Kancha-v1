@@ -9,17 +9,17 @@ export const KANCHA_TOOLS = [
     type: "function" as const,
     function: {
       name: "search_reforms",
-      description: "Search across the 27 official Nepal Reform proposals by keywords, problem statements, solutions, or category (e.g. Anti-Corruption, Governance, Economy, Digital, Education).",
+      description: "Search across the 31 official Nepal Reform proposals by keywords, problem statements, solutions, or category (e.g. Anti-Corruption, Governance, Economy, Digital, Education, Tourism, Foreign Policy).",
       parameters: {
         type: "object",
         properties: {
           query: {
             type: "string",
-            description: "Search query or keyword (e.g. 'CIAA', 'elections', 'civil service', 'corruption', 'procurement', 'health', 'education')"
+            description: "Search query or keyword (e.g. 'CIAA', 'elections', 'civil service', 'corruption', 'procurement', 'health', 'education', 'foreign policy', 'tourism')"
           },
           category: {
             type: "string",
-            description: "Optional specific category filter (e.g. 'Anti-Corruption', 'Governance', 'Digital Services')"
+            description: "Optional specific category filter (e.g. 'Anti-Corruption', 'Governance', 'Digital Services', 'Foreign Policy', 'Tourism Development')"
           },
           limit: {
             type: "number",
@@ -34,7 +34,7 @@ export const KANCHA_TOOLS = [
     type: "function" as const,
     function: {
       name: "get_reform_details",
-      description: "Retrieve comprehensive details for a specific Nepal Reform proposal by ID (1 to 27), including detailed problem analysis, phased implementation solutions (Phase 1 Statutory, Phase 2 Constitutional), real-world evidence, and performance targets.",
+      description: "Retrieve comprehensive details for a specific Nepal Reform proposal by ID (1 to 31), including detailed problem analysis, phased implementation solutions (Phase 1 Statutory, Phase 2 Constitutional), real-world evidence, and performance targets.",
       parameters: {
         type: "object",
         properties: {

@@ -31,8 +31,8 @@ export async function generateLocalFallbackResponse(
   ]
 
   let reasoning = isNe
-    ? `१. प्रयोगकर्ताको प्रश्न: "${query}" लाई विश्लेषण गरियो।\n२. नेपाल सुधारको २७ बुँदे घोषणापत्र र नेपालको संविधान २०७२ बाट सम्बन्धित सुधार तथा प्रमाणहरू संकलन गरियो।\n३. प्राथमिकता प्राप्त सुधार: #${topReform ? topReform.id : '1'} को कार्ययोजना र अन्तर्राष्ट्रिय अभ्यासहरू समावेश गरी उत्तर तयार पारियो।`
-    : `1. Analyzed user query: "${query}"\n2. Executed local semantic retrieval across all 27 Nepal Reform blueprints and Constitution 2072 provisions.\n3. Identified primary matching reform: #${topReform ? topReform.id : '1'} with implementation roadmap and global evidence.`
+    ? `१. प्रयोगकर्ताको प्रश्न: "${query}" लाई विश्लेषण गरियो।\n२. नेपाल सुधारको ३१ बुँदे घोषणापत्र र नेपालको संविधान २०७२ बाट सम्बन्धित सुधार तथा प्रमाणहरू संकलन गरियो।\n३. प्राथमिकता प्राप्त सुधार: #${topReform ? topReform.id : '1'} को कार्ययोजना र अन्तर्राष्ट्रिय अभ्यासहरू समावेश गरी उत्तर तयार पारियो।`
+    : `1. Analyzed user query: "${query}"\n2. Executed local semantic retrieval across all 31 Nepal Reform blueprints and Constitution 2072 provisions.\n3. Identified primary matching reform: #${topReform ? topReform.id : '1'} with implementation roadmap and global evidence.`
 
   let content = ""
 
@@ -89,13 +89,13 @@ ${topReform.realWorldEvidence.short.map(e => `* 🌐 ${e}`).join("\n")}
     if (isNe) {
       content = `नमस्ते! म **कान्छा (NRAI Kancha)** हुँ, नेपाल सुधार (Nepal Reforms) को एआई सहायक।
 
-तपाईंले नेपालको **२७ बुँदे सुधार योजना**, अख्तियार दुरुपयोग नियन्त्रण, प्रत्यक्ष निर्वाचित कार्यकारी, डिजिटल सार्वजनिक सेवा, शिक्षा-स्वास्थ्य सुधार वा चुनावी प्रणालीका बारेमा कुनै पनि प्रश्न सोध्न सक्नुहुन्छ।
+तपाईंले नेपालको **३१ बुँदे सुधार योजना**, अख्तियार दुरुपयोग नियन्त्रण, प्रत्यक्ष निर्वाचित कार्यकारी, डिजिटल सार्वजनिक सेवा, शिक्षा-स्वास्थ्य सुधार, परराष्ट्र नीति वा पर्यटन विकासका बारेमा कुनै पनि प्रश्न सोध्न सक्नुहुन्छ।
 
 कृपया तल दिइएका उदाहरण प्रश्नहरूबाट सुरु गर्नुहोस् वा आफ्नो प्रश्न टाइप गर्नुहोस्!`
     } else {
       content = `Namaste! I am **NRAI Kancha**, your dedicated AI Civic Agent for **Nepal Reforms** (nepalreforms.com).
 
-I can answer questions regarding any of Nepal's **27 Core Governance Reforms**, including CIAA independence, direct executive elections, civil service meritocracy, transparent procurement, and fiscal federalism.
+I can answer questions regarding any of Nepal's **31 Core Governance Reforms**, including CIAA independence, direct executive elections, civil service meritocracy, transparent procurement, foreign policy, and tourism modernization.
 
 Ask me a specific question or choose from the suggested prompts below!`
     }

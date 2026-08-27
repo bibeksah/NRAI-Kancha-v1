@@ -74,7 +74,7 @@ export function StarterPrompts({ onSelectPrompt, language = "en" }: StarterPromp
       <div className="text-center space-y-2">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
           <Sparkles className="w-3.5 h-3.5" />
-          {isNe ? "२७ बुँदे नेपाल सुधार एजेन्डा" : "27 Core Nepal Reform Agendas"}
+          {isNe ? "३१ बुँदे नेपाल सुधार एजेन्डा" : "31 Core Nepal Reform Agendas"}
         </div>
         <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
           {isNe ? "म कान्छा, तपाईंलाई के मद्दत गर्न सक्छु?" : "What reform would you like to explore?"}
